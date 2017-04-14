@@ -1,0 +1,47 @@
+extends layout.pug
+
+block append scripts
+  script(src='/start.js')
+
+block content
+  h1 app started
+  
+  if frontendowner
+    p You have the controls:  #[a(href='/stop') Stop bot]
+    
+  p last feedback: 
+    span#action #{status.msg}
+  
+  p last tick:
+    span#tick.relativetime (awaiting)
+  
+  table
+    thead
+      tr
+        th &nbsp;
+        th Last  access
+        th Count
+        
+    tbody
+      tr
+        td Ping
+        td 
+          span#ping #{status.lastPing} 
+          span#ping_human.relativetime tbd
+        td#ping_count #{status.cntPing}
+      tr
+        td Message
+        td 
+          span#msg #{status.lastMessage} 
+          span#msg_human.relativetime tbd
+        td#msg_count #{status.cntMessage}
+        
+  
+  p room: #{status.room}
+  
+  p user: #{status.user}
+  
+  p Loaded user commands:
+  ul
+    each val in status.commands ? status.commands : [{command:'no load yet'}]
+      li= val.command

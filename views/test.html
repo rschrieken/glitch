@@ -1,0 +1,58 @@
+    <section class="suite">
+      <h1>Array</h1>
+      <dl>
+        <section class="suite">
+          <h1>#indexOf()</h1>
+          <dl>
+            <dt>should return -1 when the value is not present</dt>
+            <dd><pre><code>assert.equal(-1, [1,2,3].indexOf(4));</code></pre></dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
+    <section class="suite">
+      <h1>simpleparser</h1>
+      <dl>
+        <section class="suite">
+          <h1>A successful debug parser</h1>
+          <dl>
+test
+            <dt>accepts data and end event</dt>
+            <dd><pre><code>var resp = new EventEmitter();
+var db = new parser('debug', resp).then(()=&gt;{
+  done();
+});
+resp.emit('data', 'test');        
+resp.emit('end', 'test');</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>An error debug parser</h1>
+          <dl>
+test
+            <dt>accepts an error event</dt>
+            <dd><pre><code>var resp = new EventEmitter();
+var db = new parser('debug', resp).then(()=&gt;{
+  done('failed');
+}, () =&gt; { 
+  done(); });
+resp.emit('error', 'test');</code></pre></dd>
+          </dl>
+        </section>
+        <section class="suite">
+          <h1>A successful fkey parser</h1>
+          <dl>
+            <dt class="error">returns an fkey from an html stream</dt>
+            <dd class="error"><pre><code>var expect = '41';
+var resp = new EventEmitter();
+new parser('fkey', resp).then((fkey)=&gt;{
+  //assert.equal('41', fkey);
+  fkey===expect ? done() : done('fkey ' + fkey + ' &lt;&gt; ' + expect);
+});
+resp.emit('data', '&lt;input name=&quot;fkey&quot; value=&quot;42&quot; /&gt;');        
+resp.emit('end', '');</code></pre></dd>
+            <dd class="error">Error: done() invoked with non-Error: fkey 42 &lt;&gt; 41</dd>
+          </dl>
+        </section>
+      </dl>
+    </section>
