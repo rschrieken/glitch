@@ -42,8 +42,8 @@ resp.emit('error', 'test');</code></pre></dd>
         <section class="suite">
           <h1>A successful fkey parser</h1>
           <dl>
-            <dt class="error">returns an fkey from an html stream</dt>
-            <dd class="error"><pre><code>var expect = '41';
+            <dt>returns an fkey from an html stream</dt>
+            <dd><pre><code>var expect = '42';
 var resp = new EventEmitter();
 new parser('fkey', resp).then((fkey)=&gt;{
   //assert.equal('41', fkey);
@@ -51,7 +51,6 @@ new parser('fkey', resp).then((fkey)=&gt;{
 });
 resp.emit('data', '&lt;input name=&quot;fkey&quot; value=&quot;42&quot; /&gt;');        
 resp.emit('end', '');</code></pre></dd>
-            <dd class="error">Error: done() invoked with non-Error: fkey 42 &lt;&gt; 41</dd>
           </dl>
         </section>
       </dl>

@@ -27,8 +27,18 @@ ChatRoom.prototype = new EventEmitter();
 function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey, uid) {
   
   var serverbase = chatServerBaseUrl;
-  var browser = authenticatedBrowser;
   var roomId = activeRoomId;
+  
+  var urls = {
+    'new': serverbase + '/chats/'+ roomId +'/messages/new',
+    'info': serverbase + '/user/info',
+    'auth': serverbase + '/ws-auth',
+    'events': serverbase + '/chats/' + roomId + '/events',
+    'leave': serverbase + '/chats/leave/' + roomId
+  }
+  
+  var browser = authenticatedBrowser;
+  
   var fkey = activeFkey;
   var userid = uid;
   
@@ -39,11 +49,11 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
   }
 
   ChatRoom.prototype.postMessage = function (msg) {
-    var url = serverbase + '/chats/'+ roomId +'/messages/new';
+   // var url = serverbase + '/chats/'+ roomId +'/messages/new';
     var self = this;
     this.emit('action', 'message');
     function executor(resolve,reject) {
-      browser.postform(url, {
+      browser.postform(urls.new, {
             text: msg,
             fkey: fkey
           }).
@@ -60,7 +70,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
 
   ChatRoom.prototype.postInfo = function  (userIds) {
 
-    var url = serverbase + '/user/info';
+   // var url = serverbase + '/user/info';
     var users = userIds || [];
     var self = this;
     this.emit('action', 'info');
@@ -86,7 +96,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
       if (users.length === 0) {
         resolve({})
       } else {
-        browser.postform(url, {
+        browser.postform(urls.info, {
               ids: users.join(','),
               roomId: roomId
           }).
@@ -104,12 +114,12 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
   }
 
   ChatRoom.prototype.postWSauth = function (time) {
-      var url = serverbase + '/ws-auth';
+      //var url = serverbase + '/ws-auth';
       var self = this;
       this.emit('action', 'ws-auth');
       function executor(resolve,reject) {
         
-        browser.postform(url,{
+        browser.postform(urls.auth ,{
             roomid: roomId,
             fkey: fkey
           }).
@@ -131,12 +141,12 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
 
 
     ChatRoom.prototype.postEvents = function (cnt) {
-      var url = serverbase + '/chats/' + roomId + '/events';
+      //var url = serverbase + '/chats/' + roomId + '/events';
       this.emit('action', 'events');
       
      
       function executor(resolve,reject) {
-        browser.postform(url,{
+        browser.postform(urls.events,{
             since: 0,
             mode: 'Messages',
             msgCount: cnt || 1,
@@ -154,13 +164,13 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     
     ChatRoom.prototype.postLeave = function () {
       // http://chat.meta.stackexchange.com/chats/leave/1034
-      var url = serverbase + '/chats/leave/' + roomId;
+      //var url = serverbase + '/chats/leave/' + roomId;
       this.emit('action', 'leave');
       if (this.ws !== undefined && this.ws !== null) this.ws.close(1012, 'stop');
       
       function executor(resolve,reject) {
         
-        browser.postform(url,
+        browser.postform(urls.leave,
           {
             quiet: true,
             fkey: fkey

@@ -10,7 +10,7 @@ describe('Array', function() {
 });
 
 describe('simpleparser', () => {
-  var parser = require('../simpleparsers.js');
+  var parser = require('../server/simpleparsers.js');
   const EventEmitter = require('events');
   
   
@@ -39,7 +39,7 @@ describe('simpleparser', () => {
   
   describe('A successful fkey parser', () => {
     it('returns an fkey from an html stream', (done) => {
-      var expect = '41';
+      var expect = '42';
       var resp = new EventEmitter();
       new parser('fkey', resp).then((fkey)=>{
         //assert.equal('41', fkey);

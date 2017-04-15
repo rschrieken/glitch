@@ -8,10 +8,14 @@ var cookieParser = require('cookie-parser');
 var cookie = require('cookie');
 const crypto = require('crypto');
 const WebSocket = require('ws');
-const fs = require('fs')
+const fs = require('fs');
 
-var se = require('./se-login.js');
+var path = require('path');
+var scriptName = path.basename(__filename);
+
+var se = require('./server/se-login.js');
 var app = express();
+
 
 app.set('views', './views') // specify the views directory
 app.set('view engine', 'pug') // register the template engine
@@ -39,7 +43,7 @@ app.get("/", function (request, response) {
     var frontendowner = (buf.toString('base64') === request.signedCookies.frontendowner) 
     response.render('start', { title: 'Bot Control', status: statusmodel, frontendowner: frontendowner});  
   } else {
-    response.render('index', {title: 'Bot Control'});
+    response.render('index', {title: 'Bot Control', roomid: process.env.ROOMID || 1 });
   }
 });
 
@@ -71,30 +75,38 @@ app.get("/test", function (request, response) {
 var buf;
 
 app.post("/start", function (request, response) {
-  if (se.isLoginValid(request.body)) {
-    se.login(request.body.user, request.body.pwd, request.body.roomId, request.body.server).
-    then(msg => {
-      buf = crypto.randomBytes(256);
-      response.cookie('frontendowner', buf.toString('base64'), {signed: true});
-      response.render('start', { title: 'Bot Control', status: msg, frontendowner:true });
-    }).
-    catch(msg => {
-      response.render('index', {title: 'Bot Control', error: msg});
-    });
-    
+  if (se.isInitialized()) {
+    response.redirect('/');
   } else {
-    response.render('index', {title: 'Bot Control', error: 'Invalid input'});
+    if (se.isLoginValid(request.body)) {
+      se.login(request.body.user, request.body.pwd, request.body.roomId, request.body.server).
+      then(msg => {
+        buf = crypto.randomBytes(256);
+        response.cookie('frontendowner', buf.toString('base64'), {signed: true});
+        response.render('start', { title: 'Bot Control', status: msg, frontendowner:true });
+      }).
+      catch(msg => {
+        response.render('index', {title: 'Bot Control', error: msg});
+      });
+
+    } else {
+      response.render('index', {title: 'Bot Control', error: 'Invalid input'});
+    }
   }
 });
 
 app.get("/stop", function (request, response){
-  if(buf.toString('base64') === request.signedCookies.frontendowner) {
+  if(se && buf && (buf.toString('base64') === request.signedCookies.frontendowner)) {
     se.stop();
     response.redirect('/');
   } else {
     response.status(404);
   }
 });
+
+if (process.env.USER && process.env.PWD && process.env.ROOMID) {
+  console.log('user, pwd and room set');
+}
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
@@ -104,9 +116,6 @@ var listener = app.listen(process.env.PORT, function () {
 const wss = new WebSocket.Server({ server:listener });
 
 wss.on('connection', function connection(ws) {
-  //const location = url.parse(ws.upgradeReq.url, true);
-  // You might use location.query.access_token to authenticate or share sessions 
-  // or ws.upgradeReq.headers.cookie (see http://stackoverflow.com/a/16395220/151312) 
  
   ws.on('message', function incoming(message) {
     console.log('received: %s', message);
@@ -121,7 +130,7 @@ wss.on('connection', function connection(ws) {
   se.statusEvents().on('action', action);
   
   const status = (a) => {
-    console.log('status %s', a);
+    console.log('status %o', a);
     if (ws.readyState === 1) {
       ws.send(JSON.stringify({event: 'status', payload: a}));
     }

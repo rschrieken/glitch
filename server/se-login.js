@@ -1,7 +1,9 @@
+const EventEmitter = require('events');
+
 const browser = require('./simplebrowser.js');
 const ResponseParser = require('./simpleparsers.js');
 const Room = require('./se-chatroom.js');
-const EventEmitter = require('events');
+
 
 class GlobalEmitter extends EventEmitter {}
 
@@ -27,7 +29,9 @@ function postlogin(form, chatServerUrl, roomId) {
       respParser.then( function(identity /*foundfkey, userid*/){
           roomInstance = new Room(roomId, chatServerUrl, webbrowser, identity.fkey, identity.userid);
           roomInstance.on('action', (m) => { globalEmitter.emit('action', m); });
-          roomInstance.on('status', (s) => { globalEmitter.emit('status', s); });
+          roomInstance.on('status', (s) => {          
+            globalEmitter.emit('status', s); 
+          });
           roomInstance.on('tick', (time) => { globalEmitter.emit('tick', time); });
           roomInstance.init().then(resolve);  
         }, reject);

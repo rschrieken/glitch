@@ -50,9 +50,33 @@
     _count.textContent = count;
   }
   
+  function removeNodes(node){
+    while(node.firstChild){
+      node.removeChild(node.firstChild);
+    }
+  }
+  
+  function createCommandLi(cmd){
+    var li = document.createElement('li');
+    li.textContent = cmd;
+    return li;
+  }
+  
+  function refreshCommands(cmds) {
+    var i, ul;
+    if (cmds && cmds.length && cmds.length > 0) {
+      ul = document.getElementById('cmds');
+      removeNodes(ul);
+      for(i = 0; i < cmds.length; i = i + 1) {
+        ul.appendChild(createCommandLi(cmds[i].command));
+      }
+    }
+  }
+  
   function refreshStatus(status) {
     refreshRow('ping', status.lastPing, status.cntPing );
     refreshRow('msg', status.lastMessage, status.cntMessage);
+    refreshCommands(status.commands);
   }
   
   function refreshTick(time) {

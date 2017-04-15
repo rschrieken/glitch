@@ -1,6 +1,7 @@
 const WebSocket = require('ws');
-const Kenny = require('./kenny-bot.js');
 
+const Kenny = require('../bots'); // require('../kenny-bot.js');
+ 
 function StartWebSocketListener(url, roomInstance)
 {
   
@@ -49,7 +50,10 @@ function StartWebSocketListener(url, roomInstance)
       } 
     });
     ws.addEventListener('error', (e)=>{ console.log('ws error for %s: %s', roomId, e) } );
-    ws.addEventListener('open', () => { console.log('ws open for %s', roomId);} );
+    ws.addEventListener('open', () => { 
+      console.log('ws open for %s', roomId);
+      roomInstance.emit('status',roomInstance.status);
+    });
     ws.addEventListener('close', () => { Kenny.close(); });
     return ws;
 }

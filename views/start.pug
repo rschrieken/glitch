@@ -13,7 +13,7 @@ block content
     span#action #{status.msg}
   
   p last tick:
-    span#tick.relativetime (awaiting)
+    span#tick.relativetime (waiting for data)
   
   table
     thead
@@ -26,14 +26,14 @@ block content
       tr
         td Ping
         td 
-          span#ping #{status.lastPing} 
-          span#ping_human.relativetime tbd
+          span#ping (waiting for data) 
+          span#ping_human.relativetime 
         td#ping_count #{status.cntPing}
       tr
         td Message
         td 
-          span#msg #{status.lastMessage} 
-          span#msg_human.relativetime tbd
+          span#msg (waiting for data) 
+          span#msg_human.relativetime 
         td#msg_count #{status.cntMessage}
         
   
@@ -42,6 +42,6 @@ block content
   p user: #{status.user}
   
   p Loaded user commands:
-  ul
-    each val in status.commands ? status.commands : [{command:'no load yet'}]
+  ul#cmds
+    each val in status.commands ? status.commands : [{command:'(waiting for data)'}]
       li= val.command
