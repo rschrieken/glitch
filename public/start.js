@@ -139,7 +139,7 @@
   
   init();
   var loc = document.location;
-  var url = 'wss://' + loc.hostname;
+  var url = (loc.protocol==='https:'?'wss://':'ws://') + loc.host;
   console.log(url);
   var ws = new WebSocket(url);
   var si;

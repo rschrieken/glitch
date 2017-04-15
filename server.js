@@ -3,6 +3,7 @@
 
 // init project
 var express = require('express');
+var https = require('https');
 var bodyParser = require("body-parser");
 var cookieParser = require('cookie-parser');
 var cookie = require('cookie');
@@ -109,9 +110,20 @@ if (process.env.USER && process.env.PWD && process.env.ROOMID) {
 }
 
 // listen for requests :)
-var listener = app.listen(process.env.PORT, function () {
-  console.log('Your app is listening on port ' + listener.address().port);
-});
+var listener;
+if (process.env.SSL ==='OFFLOADED') {
+    listener = app.listen(process.env.PORT, function () {
+    console.log('Your app is listening on port ' + listener.address().port);
+  });
+} else {
+   var options ={
+     key: fs.readFileSync(process.env.SSLKEYFILE),
+     cert: fs.readFileSync(process.env.SSLCERTFILE)
+   };
+   listener = https.createServer(options, app).listen(process.env.PORT, function () {
+    console.log('Your app is securely  listening on port ' + listener.address().port);
+  } );
+}
 
 const wss = new WebSocket.Server({ server:listener });
 
