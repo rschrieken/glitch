@@ -68,12 +68,26 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     return new Promise(executor);
   }
 
-  ChatRoom.prototype.postInfo = function  (userIds) {
+  ChatRoom.prototype.postInfo = function  (userIds, forceReload) {
 
    // var url = serverbase + '/user/info';
-    var users = userIds || [];
+    var users;
     var self = this;
     this.emit('action', 'info');
+    
+    function cleanUserIds(userIds) {
+      var clean = [];
+      if (forceReload !== true) {
+        userIds.forEach(function(user){
+          if (self.seenUsers[user] === undefined) {
+            clean.push(user);
+          } 
+        });
+      } else {
+        clean = userIds || [];
+      }
+      return clean;
+    }
     
     function fillUsersSeenAndRoomMods(usersinfo){
       
@@ -82,6 +96,8 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
         var cnt = 0;
         if (self.seenUsers[user.id] !== undefined) {
           cnt = self.seenUsers[user.id].cnt || 0;
+        } else {
+          
         }
         self.seenUsers[user.id] = user;
         self.seenUsers[user.id].cnt = cnt;
@@ -89,7 +105,6 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           self.roomOwners[user.id] = user;
         }
       });
-      console.log(self.seenUsers);
     }
 
     function executor(resolve,reject) { 
@@ -110,6 +125,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
       }
     }
 
+    users = cleanUserIds(userIds);
     return new Promise(executor);
   }
 

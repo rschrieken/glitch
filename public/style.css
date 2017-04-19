@@ -84,3 +84,35 @@ footer > a {
 .error {
   color:red
 }
+
+.monitor
+{ 
+  width: 200px;
+  animation: slide 45s linear;
+  animation-fill-mode: forwards;
+  /*animation-play-state: paused; */
+}
+
+@keyframes slide {
+  0%{width:0px;background:linear-gradient(to right,rgb(0,255,0),rgb(0,255,0),rgb(0,255,0));}
+5%{width:10px;background:linear-gradient(to right,rgb(0,255,0),rgb(12,255,0),rgb(12,243,0));}
+10%{width:20px;background:linear-gradient(to right,rgb(0,255,0),rgb(25,255,0),rgb(25,230,0));}
+15%{width:30px;background:linear-gradient(to right,rgb(0,255,0),rgb(38,255,0),rgb(38,217,0));}
+20%{width:40px;background:linear-gradient(to right,rgb(0,255,0),rgb(51,255,0),rgb(51,204,0));}
+25%{width:50px;background:linear-gradient(to right,rgb(0,255,0),rgb(63,255,0),rgb(63,192,0));}
+30%{width:60px;background:linear-gradient(to right,rgb(0,255,0),rgb(76,255,0),rgb(76,179,0));}
+35%{width:70px;background:linear-gradient(to right,rgb(0,255,0),rgb(89,255,0),rgb(89,166,0));}
+40%{width:80px;background:linear-gradient(to right,rgb(0,255,0),rgb(102,255,0),rgb(102,153,0));}
+45%{width:90px;background:linear-gradient(to right,rgb(0,255,0),rgb(114,255,0),rgb(114,141,0));}
+50%{width:100px;background:linear-gradient(to right,rgb(0,255,0),rgb(127,255,0),rgb(127,128,0));}
+55%{width:110px;background:linear-gradient(to right,rgb(0,255,0),rgb(140,255,0),rgb(140,115,0));}
+60%{width:120px;background:linear-gradient(to right,rgb(0,255,0),rgb(153,255,0),rgb(153,102,0));}
+65%{width:130px;background:linear-gradient(to right,rgb(0,255,0),rgb(165,255,0),rgb(165,90,0));}
+70%{width:140px;background:linear-gradient(to right,rgb(0,255,0),rgb(178,255,0),rgb(178,77,0));}
+75%{width:150px;background:linear-gradient(to right,rgb(0,255,0),rgb(191,255,0),rgb(191,64,0));}
+80%{width:160px;background:linear-gradient(to right,rgb(0,255,0),rgb(204,255,0),rgb(204,51,0));}
+85%{width:170px;background:linear-gradient(to right,rgb(0,255,0),rgb(216,255,0),rgb(216,39,0));}
+90%{width:180px;background:linear-gradient(to right,rgb(0,255,0),rgb(229,255,0),rgb(229,26,0));}
+95%{width:190px;background:linear-gradient(to right,rgb(0,255,0),rgb(242,255,0),rgb(242,13,0));}
+100%{width:200px;background:linear-gradient(to right,rgb(0,255,0),rgb(255,255,0),rgb(255,0,0));}
+}

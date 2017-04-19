@@ -52,6 +52,7 @@ function MessagePoster(room, prepend) {
       ownmsg.shift();
     }
     ownmsg.push(Date.now());
+    return ownmsg.length;
   }
   
   function isCurrentRateFine(seconds) {

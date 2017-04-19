@@ -1,8 +1,10 @@
 (function() {
+
   
   var startInterval, 
       poll_ms = 10000,
-      min_ms = 10000;
+      min_ms = 10000,
+      ticks = [];
   
   function adjustPoll() {
     if (poll_ms > min_ms) {
@@ -79,10 +81,35 @@
     refreshCommands(status.commands);
   }
   
+  function resetAnimation() {
+    var mon = document.getElementById('monitor');
+    mon.classList.remove("monitor");
+    void mon.offsetWidth;
+    mon.classList.add("monitor");
+    ticks.push(Date.now());
+    var mintick = 100000000;
+    var maxtick = -1 ;
+    var sumdiff =0;
+    var prev = ticks[0];
+    ticks.forEach(function(st){
+      var diff = st - prev;
+      if (diff !== 0) {
+        if (diff < mintick) mintick = diff;
+        if (diff > maxtick) maxtick = diff;
+        sumdiff += diff;
+      }
+      prev = st;
+    });
+    console.log('',mintick, sumdiff / ticks.length, maxtick);
+    if (ticks.length > 10000) ticks.shift();
+  }
+  
   function refreshTick(time) {
     var tick = document.getElementById('tick');
     tick.textContent = ago(time);
     tick.setAttribute('data-time',time);
+    
+    resetAnimation();
   }
   
   function reqListener () {

@@ -52,3 +52,151 @@ describe('simpleparser', () => {
   });
   
 });
+
+describe('Poster', () => {
+  var poster = require('../bots/poster.js');
+  var room;
+  var cb;
+  const EventEmitter = require('events');
+  
+  beforeEach(() => {
+    cb = null;
+    room = {
+      postMessage: function(msg){
+        if (cb!==null) cb();
+        return new Promise((r,e)=> {r(msg)})
+      }
+    };
+  })
+  
+  describe('Create a poster', () => {
+    it('accepts a room', () => {
+      var msgposter = new poster.MessagePoster(room);
+      assert.ok(msgposter);
+    });
+  });
+  
+  describe('Create a poster with a prepend', () => {
+    it('accepts a room and a prepend', () => {
+      var msgposter = new poster.MessagePoster(room, 'x');
+      assert.ok(msgposter);
+    });
+  });
+  
+  describe('Set a poster to silent', () => {
+    it('accepts a value of true', () => {
+      var msgposter = new poster.MessagePoster(room);
+      var val = msgposter.silent(true);
+      assert.ok(val);
+    });
+  });
+  
+  describe('Get a posters value of silent', () => {
+    it('should return false', () => {
+      var msgposter = new poster.MessagePoster(room);
+      var val = msgposter.silent();
+      assert.equal(false, val);
+    });
+  });
+  
+  describe('Toggle a posters value of silent', () => {
+    it('should toggle', () => {
+      var msgposter = new poster.MessagePoster(room);
+      var toggle = msgposter.silent();
+      var val = msgposter.silent(!toggle);
+      assert.equal(!toggle, val);
+    });
+  });
+  
+  describe('owmMessage', () => {
+    it('should return a length', () => {
+      var msgposter = new poster.MessagePoster(room);
+      var len = msgposter.ownMessageReceived();
+      assert.equal(2 , len);
+      len = msgposter.ownMessageReceived();
+      assert.equal(3 , len);
+    });
+  });
+  
+  describe('stop', () => {
+    it('should not throw', () => {
+      var msgposter = new poster.MessagePoster(room);
+      assert.doesNotThrow(msgposter.stop);
+      assert.doesNotThrow(msgposter.stop);
+    });
+  });
+  
+  describe('send', () => {
+    it('should post', function (done) {
+      this.timeout(5000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = done;
+      assert.doesNotThrow(() => {msgposter.send('fubar')});
+    });
+  });
+  
+  describe('send', () => {
+    it('should post after a second', function (done) {
+      this.timeout(3000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = done;
+      assert.doesNotThrow(() => {msgposter.send('fubar', 1)});
+    });
+  });
+  
+   describe('send', () => {
+    it('should post after a minute second', function (done) {
+      this.timeout(3000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = done;
+      assert.doesNotThrow(() => {msgposter.send('fubar', 0.001, 1)});
+    });
+  });
+  
+  
+  describe('send', () => {
+    it('should not post when silent', function (done) {
+      this.timeout(5000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = function() {done('called anway')};
+      msgposter.silent(true);
+      assert.doesNotThrow(() => {msgposter.send('fubar')});
+      setTimeout(done,3000);
+    });
+  });
+  
+});
+
+describe('Util', () => {
+  var util = require('../bots/util.js');
+
+  
+  describe('random time ', () => {
+    it('returns a time between lower and upper', () => {
+      var time = util.getRandomArbitrary(6,8);
+      assert.ok(time>=6 && time <=8);
+    });
+  });
+  
+  describe('seconds ', () => {
+    it('returns 1000 ms for each second', () => {
+      var time = util.seconds(1);
+      assert.equal(1000,time);
+    });
+  });
+  
+  describe('seconds ', () => {
+    it('returns 1000 ms for each second', () => {
+      var time = util.seconds(2);
+      assert.equal(2000,time);
+    });
+  });
+  
+  describe('minutes ', () => {
+    it('returns 60000 ms for each minute', () => {
+      var time = util.minutes(1);
+      assert.equal(60000,time);
+    });
+  });
+  
+});
