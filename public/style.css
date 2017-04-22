@@ -8,6 +8,10 @@
   box-sizing: border-box;
 }
 
+textarea { 
+  width: 340px;
+  height: 150px;}
+
 body {
   font-family: helvetica, arial, sans-serif;
   margin: 25px;

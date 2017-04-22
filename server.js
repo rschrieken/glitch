@@ -56,6 +56,26 @@ app.get("/status", function (request, response) {
   }
 } );
 
+var tc;
+
+app.get("/takecontrol", function (request, response) {
+  if (se) { //&& se.isInitialized() && buf && (buf.toString('base64') !== request.signedCookies.frontendowner)) {
+    tc = crypto.randomBytes(256).toString('base64');
+    response.render('takecontrol', { title: 'Take Control', key:tc });  
+  } else {
+    response.status(404);
+  }
+});
+
+app.post("/takecontrol", function (request, response) {
+  if (se) { //&& se.isInitialized() && buf && (buf.toString('base64') !== request.signedCookies.frontendowner)) {
+    console.log(request.body);
+    response.render('takecontrol', { title: 'Take Control', key:tc });  
+  } else {
+    response.status(404);
+  }
+});
+
 app.get("/test", function (request, response) {
   var html = '<html><head><link href="style.css" rel="stylesheet"></head><body>';
   fs.readFile('./views/test.html', 'utf8', function (err,data) {

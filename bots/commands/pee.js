@@ -36,7 +36,7 @@ function Pee(bot) {
 
     return {
       command: cmd,
-      events: [1],
+      events: [1, 2],
       next: stateHandler
     };
 }

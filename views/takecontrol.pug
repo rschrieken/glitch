@@ -1,0 +1,19 @@
+extends layout.pug
+
+block append scripts
+  script(src='/tc.js')
+
+block content
+
+  p copy the below key on your clipboard and enter your userid and click take control, after that reply to the bot with key
+  
+  p 
+    textarea #{key}
+
+  p
+    form(action="/takecontrol" method="post")
+      label user id
+        input(id="userid" name="userid" type="text")
+      input(type="submit" value="Take Control")
+      
+  
