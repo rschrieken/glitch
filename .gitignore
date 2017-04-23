@@ -1,2 +1,7 @@
 # gets generated 
 views/test.html
+
+node_modules/**
+
+conf/**
+
