@@ -5,11 +5,13 @@ const util = require('../util.js');
  so it toggles for a certain message and certain user
 */
 function StarResponse(bot) {
-  var seen = [], backoffFirst = false, backoffSecond = false;
+  var seen = {}, backoffFirst = false, backoffSecond = false;
   return {
     events: [6],
-        next: function (ce) {
-      var idx = seen[ce.message_id];
+    next: function (ce) {
+      var key = 'msg' + ce.message_id,
+          userkey = 'user' + ce.user_id,
+          idx = seen[key];
       if (idx === undefined) {
         if (!backoffFirst) {
           bot.send('Not everything is star-worthy...');
@@ -17,19 +19,19 @@ function StarResponse(bot) {
           setTimeout(function () { backoffFirst = false; }, util.minutes(60));
         }
 
-        seen[ce.message_id] = [];
-        seen[ce.message_id][ce.user_id] = true;
+        seen[key] = {};
+        seen[key][userkey] = true;
 
       } else {
-        if (idx[ce.user_id] === true) {
-          idx[ce.user_id]	= false;
+        if (idx[userkey] === true) {
+          idx[userkey]	= false;
           if (!backoffSecond) {
             bot.send('Stars get removed under peer-pressure?');
             backoffSecond = true;
             setTimeout(function () { backoffSecond = false; }, util.minutes(60));
           }
         } else {
-          seen[ce.message_id][ce.user_id] = true;
+          seen[key][userkey] = true;
         }
       }
     }
