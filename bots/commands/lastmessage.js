@@ -32,7 +32,7 @@ function LastMessage(bot) {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
 
-      urlCurrent = urlCurrent++ % url.length;
+      urlCurrent++ % url.length;
       
       let error;
       if (statusCode !== 200) {
@@ -78,7 +78,7 @@ function LastMessage(bot) {
          } else {
            setTimeout(function() {
               sendRandomWord(true);
-           }, util.seconds(10));
+           }, util.minutes(1));
          }  
        }
     });
