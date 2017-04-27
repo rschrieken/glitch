@@ -125,8 +125,13 @@ app.get("/stop", function (request, response){
   }
 });
 
-if (process.env.USER && process.env.PWD && process.env.ROOMID) {
+if (process.env.SEUSER && process.env.SEPWD && process.env.ROOMID && process.env.DEFAULTSERVER) {
   console.log('user, pwd and room set');
+  se.login(process.env.SEUSER, process.env.SEPWD, process.env.ROOMID, process.env.DEFAULTSERVER).
+      then(msg => {
+        buf = crypto.randomBytes(256);
+       console.log('auto start', msg);
+  }).catch((err) =>{ console.log(err) });
 }
 
 // listen for requests :)
@@ -141,7 +146,7 @@ if (process.env.SSL ==='OFFLOADED') {
      cert: fs.readFileSync(process.env.SSLCERTFILE)
    };
    listener = https.createServer(options, app).listen(process.env.PORT, function () {
-    console.log('Your app is securely  listening on port ' + listener.address().port);
+    console.log('Your app is securely listening on port ' + listener.address().port);
   } );
 }
 

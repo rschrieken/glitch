@@ -1,13 +1,14 @@
 {
-  "//1": "describes your app and its dependencies",
+  "//1": "KennyBot",
   "//2": "https://docs.npmjs.com/files/package.json",
   "//3": "updating this file will download and update your packages",
-  "name": "my-glitch-app",
+  "name": "KennyBOT",
   "version": "0.0.1",
-  "description": "What am I about?",
+  "description": "KennyBOT is a nodejs chatbot for the SE network",
   "main": "server.js",
   "scripts": {
-    "start": "(mocha --reporter doc > views/test.html || true) && node server.js",
+    "prestart": "mocha --reporter doc > views/test.html",
+    "start": "node server.js",
     "test": "mocha --reporter doc"
   },
   "dependencies": {

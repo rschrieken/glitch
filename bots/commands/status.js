@@ -17,7 +17,10 @@ function FormatSeconds(seconds) {
         return 'an hour';
     if (hours < 24)
         return hours + ' hours';
-    return 'more than 24 hours';
+    var days = Math.floor(hours / 24);
+    if (days < 366)
+        return days + ' days';
+    return 'more than an year';
 }
 
 function Status(bot) {
@@ -34,15 +37,28 @@ function Status(bot) {
         starttime.setTime(bot.started);
         var now = new Date(); 
         var diff = now.getTime() - bot.started;
-        msg = 'BOT running since: ' +  starttime + ' for ' + FormatSeconds(diff/1000) + '\r\nusername (#msg)\r\n';
+        msg = '    BOT running since: ' +  starttime + ' for ' + FormatSeconds(diff/1000) + '\r\n    ';
+        var statList = [], maxusername = 0;
         for (u in seenUsers) {
           if (seenUsers.hasOwnProperty(u)) {
             usr = seenUsers[u];
             if (usr.name && usr.cnt) {
-              msg = msg + usr.name + ' (' +  usr.cnt + ')'  + '\r\n';
+              maxusername = usr.name.length > maxusername ? usr.name.length : maxusername;
+              statList.push( { name: usr.name, cnt: usr.cnt });
             }
           }
         }
+        var padding = '';
+        for(var p=0;p<maxusername;p++) {
+          padding += ' ';
+        }
+        msg += ('username'+ padding).substring(0,maxusername) + '  (#msg)\r\n    ';
+        statList.sort( function(a, b) {
+          return a.cnt < b.cnt ? 1 : a.cnt > b.cnt ? -1 : a.name < b.name ? -1: a.name > b.name ?  1: 0;
+        }).forEach(function(stat){
+           msg = msg + (stat.name + padding).substring(0,maxusername) + '  (' +  stat.cnt + ')'  + '\r\n    ';  
+        });
+        
         bot.send(msg);
         setTimeout(function () { statussilent = false; }, util.minutes(6));
         statussilent = true;

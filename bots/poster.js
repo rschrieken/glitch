@@ -16,7 +16,7 @@ function MessagePoster(room, prepend) {
   */
   function send(txt, sorm, s) {
     var time,
-      preptxt = (txt.indexOf(':') !== 0 ? prep : '') + txt;
+      preptxt = ((txt.indexOf(':') !== 0 && txt.indexOf('    ') !== 0 ) ? prep : '') + txt;
     if (s === undefined && sorm === undefined) {
       msg.push(preptxt);
     } else {

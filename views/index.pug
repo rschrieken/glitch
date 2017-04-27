@@ -9,17 +9,19 @@ block content
   
   p(class=typeof error === "undefined" ? "hide" : "error") #{error}  
     
-  <form action="/start" method="post">
+  form(action="/start" method="post")
     p
-      <div><label for='server'>Server:</label>
-      <select id='server' name='server'>
-        <option value='1' selected >MSE</option>
-        <option value='2' >SE</option>
-        <option value='3' >SO</option>
-      </select></div>
-      <label for='roomId'>Room:</label><input id='roomId' type='text' name='roomId' value='#{roomid}'/>
-      <label for='user'>User:</label><input id='user' type='text' name='user' maxlength='50'/>
-      <label for='pwd'>Password:</label><input id='pwd' type='password' name='pwd' maxlength='100' />
+      div
+        label(for='server') Server:
+        select(id='server' name='server')
+            option(value='1' selected='selected') MSE
+            option(value='2') SE
+            option(value='3') SO
+      label(for='roomId') Room:
+      input(id='roomId' type='text' name='roomId' value=roomid) 
+      label(for='user') User:
+      input(id='user' type='text' name='user' maxlength='50')
+      label(for='pwd') Password:
+      input(id='pwd' type='password' name='pwd' maxlength='100')
     p
-      <input id="start" type="submit" value='Start'/> 
-  </form>
+      input(id="start" type="submit" value='Start') 
