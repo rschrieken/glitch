@@ -8,8 +8,8 @@ function LastMessage(bot) {
       url=['http://www.omdbapi.com/?t=shadow&y=',
            'http://www.omdbapi.com/?t=wizard&y='],
       urlCurrent = 0,
-      minutesToNext = 60,
-      minutesLow = 60,
+      minutesToNext = 2,
+      minutesLow = 2,
       skip = false;
 
   function resetTimer(noreset) {
@@ -35,19 +35,23 @@ function LastMessage(bot) {
       urlCurrent++ % url.length;
       
       let error;
+      var fetchPayload = false;
       if (statusCode !== 200) {
         error = new Error(`Request Failed.\n` +
                           `Status Code: ${statusCode}`);
       } else if (!/^application\/json/.test(contentType)) {
         error = new Error(`Invalid content-type.\n` +
                           `Expected application/json but received ${contentType}`);
+        fetchPayload = true;
       }
       if (error) {
         console.error(error.message);
         // consume response data to free up memory
-        res.resume();
-        cb({});
-        return;
+        if (!fetchPayload){
+          res.resume();
+          cb({});
+          return;
+        }
       }
 
       res.setEncoding('utf8');
@@ -55,9 +59,14 @@ function LastMessage(bot) {
       res.on('data', (chunk) => { rawData += chunk; });
       res.on('end', () => {
         try {
-          const parsedData = JSON.parse(rawData);
-          //console.log(parsedData);
-          cb(parsedData)
+          if (fetchPayload) {
+            console.log(rawData);
+            cb({});
+          } else {
+            const parsedData = JSON.parse(rawData);
+            //console.log(parsedData);
+            cb(parsedData)
+          }
         } catch (e) {
           console.error(e.message);
         }
@@ -69,12 +78,20 @@ function LastMessage(bot) {
   }
   
   function sendRandomWord(final) {
+    
+    function restart() {
+      minutesToNext = minutesToNext * 2;
+      resetTimer(true);  
+    }
+    
     fetchOmdbJson(function(data){
        if (data && data.Response && data.Response === 'True' && data.Title) {
          bot.send(data.Title);
+         restart();
        } else {
          if (final) {
            bot.send('Where is everybody!?!');
+           restart();
          } else {
            setTimeout(function() {
               sendRandomWord(true);
@@ -82,8 +99,7 @@ function LastMessage(bot) {
          }  
        }
     });
-    minutesToNext = minutesToNext * 2;
-    resetTimer(true);
+    
   }
   
   function stateHandler(ce) {
