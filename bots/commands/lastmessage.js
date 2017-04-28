@@ -8,8 +8,8 @@ function LastMessage(bot) {
       url=['http://www.omdbapi.com/?t=shadow&y=',
            'http://www.omdbapi.com/?t=wizard&y='],
       urlCurrent = 0,
-      minutesToNext = 2,
-      minutesLow = 2,
+      minutesToNext = 60,
+      minutesLow = 60,
       skip = false;
 
   function resetTimer(noreset) {
