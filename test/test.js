@@ -1,5 +1,7 @@
 var assert = require('assert');
-
+var describe = require('mocha').describe;
+var it = require('mocha').it;
+var beforeEach = require('mocha').beforeEach;
 
 describe('Array', function() {
   describe('#indexOf()', function() {
@@ -43,7 +45,7 @@ describe('simpleparser', () => {
       var resp = new EventEmitter();
       new parser('fkey', resp).then((fkey)=>{
         //assert.equal('41', fkey);
-        fkey===expect ? done() : done('fkey ' + fkey + ' <> ' + expect);
+        fkey.fkey===expect ? done() : done('fkey ' + fkey.fkey + ' <> ' + expect);
       });
       resp.emit('data', '<input name="fkey" value="42" />');        
       resp.emit('end', '');        
@@ -126,7 +128,7 @@ describe('Poster', () => {
     });
   });
   
-  describe('send', () => {
+  describe('send further', () => {
     it('should post', function (done) {
       this.timeout(5000);
       var msgposter = new poster.MessagePoster(room);
@@ -163,6 +165,51 @@ describe('Poster', () => {
       assert.doesNotThrow(() => {msgposter.send('fubar')});
       setTimeout(done,3000);
     });
+  });
+  
+});
+
+describe('Stack Exchange login', () => {
+  var browser = {
+    Browser: function() {
+      return {
+        get: function(url) {
+          function exec(res,rej) {
+            var ms = new require('stream').Readable();
+            ms._read = function(size) { /* do nothing */ };
+            setTimeout(()=> {
+              ms.emit('data', '<input name="fkey" value="42" />');
+              ms.emit('end');
+            },1);
+            res(ms);
+          }
+          
+          return new Promise(exec);
+        },
+        postform: function(url, data) {}
+      }
+    }};
+  var login = require('../server/se-login.js')( browser);
+  it('is not isInitialized ', function() {
+    assert.equal(login.isInitialized(),false)
+  });
+  
+  it('no data is not valid', function() {
+    var expected = false;
+    var actual = login.isLoginValid();
+    assert.equal(actual,expected);
+  });
+  
+  it('all data is valid', function() {
+    var expected = true;
+    var actual = login.isLoginValid({user: 'a', pwd:'b', roomId:'42', server:'1'});
+    assert.equal(actual,expected);
+  });
+  
+  it('login u/p', function(done) {
+    var expected = true;
+    var actual = login.login('a','b','42','1');
+    actual.then(done());
   });
   
 });

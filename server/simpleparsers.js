@@ -23,14 +23,29 @@ function ResponseParser(type, response) {
     return new Promise(executor);
   }
   
-  function FkeyParser(res) {
-    var fkeyParsed;
+  function FormParser(res) {
+    var metaform = {}, state = 0;
+    
+    metaform.url = res.path;
+    
     function executor(resolve, reject) {
       var parser = new htmlparser.Parser(
          {
            onopentag: function(tagname, attr) {
-             if (tagname === 'input' && attr.name && attr.name === 'fkey') {
-               fkeyParsed = attr.value;
+             if (state === 0 && tagname === 'form' && 
+                 attr.method && attr.method === 'post' && 
+                 attr.action )  {        
+               metaform.form = {};
+               metaform.action = attr.action;
+               state++;
+             }
+             if (state > 0 && tagname === 'input' && attr.name) {
+               metaform.form[attr.name] = attr.value;
+             }             
+           },
+           onclosetag: function(tagname) {
+             if (state > 0 && tagname === 'form') {
+               state = -1;
              }
            }
          },{ decodeEntities: true }
@@ -43,9 +58,62 @@ function ResponseParser(type, response) {
         reject(error);
       });
       res.on('end', (d) => {
+        console.log(res.headers, res.trailers);
         parser.end();
+        console.log(metaform);
+        if (metaform) {
+          //console.log(auth_form);
+          resolve(metaform);
+        } else {
+          reject('no form found');
+        }
+      });
+    }
+    return new Promise(executor);   
+  }
+  
+  function FkeyParser(res) {
+    var fkeyParsed, content='', auth_form;
+    function executor(resolve, reject) {
+      var parser = new htmlparser.Parser(
+         {
+           onopentag: function(tagname, attr) {
+             
+             if (tagname === 'input' && attr.name && attr.name === 'fkey') {
+               fkeyParsed = attr.value;
+             }
+             if (auth_form && tagname === 'input' && attr.name && attr.name === 'fkey') {
+               auth_form.form[attr.name] = attr.value;
+             }
+             if (auth_form && tagname === 'input' 
+                 && attr.name && attr.name === 'openid_identifier'
+                 && attr.value && attr.value.length > 0) {
+               auth_form.form[attr.name] = attr.value;
+             }
+             if ((auth_form === undefined) && tagname === 'form' && 
+                 attr.method && attr.method === 'post' && 
+                 attr.action && attr.action ==='/users/authenticate' )  {    
+               auth_form = {}
+               auth_form.form = {};
+               auth_form.post = '/users/authenticate';
+             }
+           }
+         },{ decodeEntities: true }
+      );
+      res.on('data', (d) => {
+         //content += d.toString();
+         parser.write(d);
+      });
+      res.on('error', (error) => {
+        console.log(error);
+        reject(error);
+      });
+      res.on('end', (d) => {
+        parser.end();
+        //console.log(content);
         if (fkeyParsed && fkeyParsed.length > 0) {
-          resolve(fkeyParsed);
+          //console.log(auth_form);
+          resolve({fkey: fkeyParsed, auth: auth_form });
         } else {
           reject('no fkey found');
         }
@@ -96,7 +164,7 @@ function ResponseParser(type, response) {
         if (fkeyParsed && fkeyParsed.length > 0) {
           resolve({ fkey: fkeyParsed, userid: userid});
         } else {
-          reject('no fkey found');
+          reject('no identity found');
         }
       });
     }
@@ -123,6 +191,9 @@ function ResponseParser(type, response) {
   }
   
   switch(type) {
+    case 'form':
+      parserImpl = new FormParser(response);
+      break;
     case 'fkey':
       parserImpl = new FkeyParser(response);
       break;

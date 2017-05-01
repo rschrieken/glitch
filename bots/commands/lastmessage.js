@@ -28,11 +28,13 @@ function LastMessage(bot) {
   
   function fetchOmdbJson(cb) {
     var year = new Date().getFullYear() - 1900;
-    http.get(url[urlCurrent] + (1900 + Math.floor(Math.random() * year)), (res) => {
+    var fetchUrl = url[urlCurrent] + (1900 + Math.floor(Math.random() * year));
+    console.log('%s urlCurrent: %i , fetchUrl: %s', new Date(), urlCurrent, fetchUrl);
+    http.get(fetchUrl , (res) => {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
 
-      urlCurrent++ % url.length;
+      urlCurrent = (urlCurrent++ % url.length);
       
       let error;
       var fetchPayload = false;
@@ -60,7 +62,7 @@ function LastMessage(bot) {
       res.on('end', () => {
         try {
           if (fetchPayload) {
-            console.log(rawData);
+            //console.log(rawData);
             cb({});
           } else {
             const parsedData = JSON.parse(rawData);

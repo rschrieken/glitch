@@ -14,9 +14,8 @@ const fs = require('fs');
 var path = require('path');
 var scriptName = path.basename(__filename);
 
-var se = require('./server/se-login.js');
+var se = require('./server/se-login.js')(require('./server/simplebrowser.js'));
 var app = express();
-
 
 app.set('views', './views') // specify the views directory
 app.set('view engine', 'pug') // register the template engine

@@ -7,6 +7,7 @@ function Browser(dummyjar) {
   
   const jar = new tc.CookieJar();
   var lastCookies = '';
+  var currentUrl;
   
   function getCookieHeader(cookies) {
     var s=[], c;
@@ -23,7 +24,6 @@ function Browser(dummyjar) {
 
   function saveCookies(setcookie, url) {
     if (setcookie !== undefined) {
-      //console.log('saveCookies %s , %s', setcookie, url);
       if (Array.isArray(setcookie)) {
         for(var c in setcookie) {
           jar.setCookie(setcookie[c], url, {}, function(err, cookie) { if (err) {console.log(err);} });
@@ -32,7 +32,7 @@ function Browser(dummyjar) {
         jar.setCookie(setcookie, url, {}, function(err, cookie) { if(err) {console.log(err);} });
       }
     } else {
-      console.log('savecookies: no cookies for %s', url);
+      //console.log('savecookies: no cookies for %s', url);
     }
   }
   
@@ -45,7 +45,7 @@ function Browser(dummyjar) {
     //console.log(data);
     function executor(resolve, reject) {
       var req = https.request(options, (res) => {
-        console.log(res.statusCode);
+        //console.log(res.statusCode);
         saveCookies(res.headers['set-cookie'], URL.format(options));
         if (res.statusCode === 301 || res.statusCode === 302 ) {
           var opt = URL.parse(res.headers['location']);
@@ -76,6 +76,7 @@ function Browser(dummyjar) {
   
   function optionsBuilder(url, method, headers) {
     var urlObject = URL.parse(url);  
+    currentUrl = url;
     function executor(resolve, reject) {
       jar.getCookies(url, function(error,cookies) {  
         if (error) {
@@ -115,7 +116,8 @@ function Browser(dummyjar) {
   return {
     get: get,
     postform: postform,
-    cookie: cookie
+    cookie: cookie,
+    url: function() { return currentUrl;}
   };
 }
 

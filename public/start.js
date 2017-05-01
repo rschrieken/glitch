@@ -19,23 +19,32 @@
   function FormatSeconds(seconds) {
       if (seconds <= 0)
           return 'now';
+      if (seconds < 2)
+          return 'less than a second ago'
+      if (seconds < 30)
+          return seconds + ' seconds ago'
       if (seconds < 60)
-          return 'less than a minute';
+          return 'less than a minute ago';
       var minutes = Math.floor(seconds / 60);
       if (minutes < 2)
-          return 'a minute';
+          return 'a minute ago';
       if (minutes < 60)
-          return minutes + ' minutes';
+          return minutes + ' minutes ago';
       var hours = Math.floor(minutes / 60);
       if (hours < 2)
-          return 'an hour';
+          return 'an hour ago';
       if (hours < 24)
           return hours + ' hours';
-      return 'more than 24 hours';
+      var days = Math.floor(hours / 24);
+      if (days <2) 
+          return 'a day ago';
+      if (days < 7)
+          return days + ' days ago';
+      return 'more than a week ago';
   }
   
   function ago(time) {
-    return ' (' + FormatSeconds((Date.now() - time) / 1000) + ' ago)';
+    return ' (' + FormatSeconds((Date.now() - time) / 1000) + ')';
   }
   
   function smallDate(time) {

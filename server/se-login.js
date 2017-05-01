@@ -1,6 +1,5 @@
 const EventEmitter = require('events');
 
-const browser = require('./simplebrowser.js');
 const ResponseParser = require('./simpleparsers.js');
 const Room = require('./se-chatroom.js');
 
@@ -9,9 +8,18 @@ class GlobalEmitter extends EventEmitter {}
 
 const globalEmitter = new GlobalEmitter();
 
-
 var roomInstance;
-var webbrowser = new browser.Browser();
+var webbrowser;
+
+function joinroom(roomId, chatServerUrl, webbrowser, identity) {
+  roomInstance = new Room(roomId, chatServerUrl, webbrowser, identity.fkey, identity.userid);
+  roomInstance.on('action', (m) => { globalEmitter.emit('action', m); });
+  roomInstance.on('status', (s) => {          
+    globalEmitter.emit('status', s); 
+  });
+  roomInstance.on('tick', (time) => { globalEmitter.emit('tick', time); });
+  return roomInstance.init();  
+}
 
 function postlogin(form, chatServerUrl, roomId) {
   
@@ -27,13 +35,9 @@ function postlogin(form, chatServerUrl, roomId) {
     then((res) => {
       var respParser = new ResponseParser('ident',res);
       respParser.then( function(identity /*foundfkey, userid*/){
-          roomInstance = new Room(roomId, chatServerUrl, webbrowser, identity.fkey, identity.userid);
-          roomInstance.on('action', (m) => { globalEmitter.emit('action', m); });
-          roomInstance.on('status', (s) => {          
-            globalEmitter.emit('status', s); 
-          });
-          roomInstance.on('tick', (time) => { globalEmitter.emit('tick', time); });
-          roomInstance.init().then(resolve);  
+        joinroom(roomId, chatServerUrl, webbrowser, identity).
+          then(resolve,reject).
+          catch((e)=> { console.log(e); reject('room joined failed'); });
         }, reject);
     });
   }
@@ -41,15 +45,15 @@ function postlogin(form, chatServerUrl, roomId) {
   return new Promise(executor);
   
 }
-exports.status = function() {
+function status () {
   return roomInstance.status;
 }
 
-exports.statusEvents = function () {
+function statusEvents () {
   return globalEmitter;
 }
 
-exports.isLoginValid = function (body) {
+function isLoginValid (body) {
   var expected = ['user', 'roomId', 'pwd', 'server'],
       notnull = ['user', 'roomId', 'pwd','server'],
       numbers = ['roomId','server'],
@@ -72,32 +76,32 @@ exports.isLoginValid = function (body) {
         if (fld === id) {
           if (domain[fld].indexOf(body[id]) === -1) {
             invalidFields++;
-            console.log('domain %s not valid  for %s = "%s"',fld, id, body[id]);      
+            //console.log('domain %s not valid  for %s = "%s"',fld, id, body[id]);      
           }
         }
       }
     } else {
       invalidFields++;
-      console.log(id);
+      //console.log(id);
     }
   }
-  // console.log('%s:%s:%s', validFields, notnullFields, invalidFields);
+  //console.log('%s:%s:%s:%s', expectedFields, notnullFields, numbersFields, invalidFields);
   return ((expectedFields === expected.length) &&
           (notnullFields === notnull.length) && 
           (numbersFields == numbers.length) &&
           invalidFields === 0);
 }
 
-exports.isInitialized = function () {
+function  isInitialized() {
   return roomInstance !== undefined && roomInstance !== null && roomInstance.isComplete();
 }
 
-exports.stop = function () {
+function stop () {
   roomInstance.postLeave();
   roomInstance = null;
 }
 
-exports.login = function (user, pwd, roomId, server) {
+function login (user, pwd, roomId, server) {
   
   var loginurl, serverbase;
   
@@ -115,16 +119,69 @@ exports.login = function (user, pwd, roomId, server) {
     
   loginurl = serverbase.replace('chat.','') + process.env.LOGINPATH;
   
+  
+  
   function executor(resolve,reject) {
+    // universal auth is not that universal
+    function loginse(url, form) {
+      webbrowser.postform(url, form).then((res) =>{
+        var resp2 = new ResponseParser('form',res);
+        resp2.then((kof) =>{
+          var parts = webbrowser.url().split('/');
+          var hostname = parts[0]+'//' + parts[2];
+          console.log('login se parsed ',kof, hostname);
+          kof.form.email = user;
+          kof.form.password = pwd;
+          webbrowser.postform(hostname + kof.action, kof.form).then((ores) => {
+            webbrowser.get(serverbase + '/rooms/' + roomId ).then( (chatres) => {
+              var respParser = new ResponseParser('ident',chatres);
+              respParser.then( function(identity /*foundfkey, userid*/){
+                console.log(identity);
+                joinroom(roomId, serverbase, webbrowser, identity).
+                  then(resolve,reject).
+                  catch((e)=> { console.log(e); reject('room joined failed'); });
+              });
+            });
+          });
+        }, reject);
+      }).catch(reject);
+    }
+    
     console.log(loginurl);
     webbrowser.get(loginurl).
     then((res) => {
       var respParser = new ResponseParser('fkey',res);
-      respParser.then( function(foundfkey){
-          postlogin({ email: user, password:pwd, fkey: foundfkey }, serverbase, roomId).then(resolve).catch(reject);
+      respParser.then( function(keyorform){
+          if (keyorform.auth !== undefined) {
+            loginse(
+              serverbase.replace('chat.','') + keyorform.auth.post, 
+              keyorform.auth.form
+            );
+          } else {
+            postlogin(
+              { 
+                email: user, 
+                password:pwd, 
+                fkey: keyorform.fkey 
+              }, 
+              serverbase, 
+              roomId).then(resolve).catch(reject);
+          }
         }, reject);
     });
   }
   
   return new Promise(executor);
 };
+
+module.exports = function (browser) {
+  webbrowser = new browser.Browser();
+  return {
+    login: login,
+    stop: stop,
+    isInitialized: isInitialized,
+    isLoginValid: isLoginValid,
+    statusEvents: statusEvents,
+    status: status
+  }
+}

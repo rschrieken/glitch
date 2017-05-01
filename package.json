@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "prestart": "mocha --reporter doc > views/test.html",
-    "start": "node server.js",
+    "start": "(mocha --reporter doc > views/test.html  || true) && node server.js",
     "test": "mocha --reporter doc"
   },
   "dependencies": {
@@ -17,9 +17,9 @@
     "body-parser": "^1.17.1",
     "htmlparser2": "^3.9.2",
     "tough-cookie": "^2.3.2",
-    "ws": "^2.2.3",
+    "ws": "^2.3.1",
     "glob": "^7.1.1",
-    "mocha": "^3.2.0",
+    "mocha": "^3.3.0",
     "cookie-parser": "^1.4.3",
     "cookie": "^0.3.1",
     "log": "^1.4.0"
