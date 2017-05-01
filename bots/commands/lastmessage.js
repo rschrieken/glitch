@@ -7,7 +7,15 @@ function LastMessage(bot) {
   var listener,
       url=['http://www.omdbapi.com/?t=shadow&y=',
            'http://www.omdbapi.com/?t=wizard&y='],
+      fallback =[
+        'Where is everybody!?!',
+        'Can\'t we be a bit moar talkative?',
+        '[I\'m a little bit lonely...](https://www.youtube.com/watch?v=dUq16D_bqpo)',
+        'Echo ... E c h o  ...... E   c  h   o .....',
+        'A few more hours and this room will be frozen ...'
+      ],
       urlCurrent = 0,
+      fallbackCurrent = 0,
       minutesToNext = 60,
       minutesLow = 60,
       skip = false;
@@ -29,12 +37,13 @@ function LastMessage(bot) {
   function fetchOmdbJson(cb) {
     var year = new Date().getFullYear() - 1900;
     var fetchUrl = url[urlCurrent] + (1900 + Math.floor(Math.random() * year));
-    console.log('%s urlCurrent: %i , fetchUrl: %s', new Date(), urlCurrent, fetchUrl);
+    console.log('%s urlCurrent: %d , fetchUrl: %s', new Date(), urlCurrent, fetchUrl);
     http.get(fetchUrl , (res) => {
       const { statusCode } = res;
       const contentType = res.headers['content-type'];
 
-      urlCurrent = (urlCurrent++ % url.length);
+      urlCurrent++;
+      urlCurrent = ( urlCurrent % url.length);
       
       let error;
       var fetchPayload = false;
@@ -92,7 +101,9 @@ function LastMessage(bot) {
          restart();
        } else {
          if (final) {
-           bot.send('Where is everybody!?!');
+           bot.send(fallback[fallbackCurrent]);
+           fallbackCurrent++;
+           fallbackCurrent = (fallbackCurrent % fallback.length);
            restart();
          } else {
            setTimeout(function() {
