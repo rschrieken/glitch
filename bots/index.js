@@ -1,6 +1,12 @@
 const glob = require( 'glob' ),
       path = require( 'path' ),
+      EventEmitter = require('events'),
       poster = require('./poster.js');
+
+class CommandEmitter extends EventEmitter {}
+
+const cmdEmitter = new CommandEmitter();
+
 
 var //commandCollection = [],
     commandInstances =[],
@@ -9,7 +15,7 @@ var //commandCollection = [],
     unk,
     ownerCommand,
     started = Date.now();
-
+    
 function handleEvent(ce) {
   var i, commandExecuted, length, state, cmdRegex = /^(!!\w+)($|\s(\w*))/, cmd;
       commandExecuted = false;
@@ -86,7 +92,7 @@ function statesAccessor() {
   var copy = [];
   commandInstances.forEach(function(state){
     if (state.command) {
-      copy.push( { command: state.command });
+      copy.push( { command: state.command, ttw: state.ttw });
     }
   });
   return copy;
@@ -122,11 +128,16 @@ function init(roomInstance) {
     silence: messagePoster.silent,
     started: started,
     seenUsers: function () {return roomInstance === undefined?{}:roomInstance.seenUsers },
-    states: statesAccessor
+    states: statesAccessor,
+    oncmd: cmdEmitter
   });
   
   room = roomInstance;
 }
+
+cmdEmitter.on('time', (cmd, time) => {
+  
+})
 
 exports.handleEvents = handleEvents;
 exports.init = init;

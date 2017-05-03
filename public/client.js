@@ -1,4 +1,4 @@
-var Bot = function(bot) {
+var Bot = (function(bot) {
   var scope = bot || {};
   
   function start() {
@@ -8,4 +8,4 @@ var Bot = function(bot) {
   scope.start = start;
   
   return scope;
-}(Bot)
+})(Bot)

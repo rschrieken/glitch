@@ -186,7 +186,16 @@ describe('Stack Exchange login', () => {
           
           return new Promise(exec);
         },
-        postform: function(url, data) {}
+        postform: function(url, data) {
+          return new Promise((res,rej)=> {
+            var ms = new require('stream').Readable();
+            ms._read = function(size) { /* do nothing */ };
+            setTimeout(()=> {
+              ms.emit('data', '<input name="fkey" value="42" />');
+              ms.emit('end');
+            },1);
+            res(ms);});
+        }
       }
     }};
   var login = require('../server/se-login.js')( browser);

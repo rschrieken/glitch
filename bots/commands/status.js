@@ -24,9 +24,10 @@ function FormatSeconds(seconds) {
 }
 
 function Status(bot) {
-  var msg, statussilent = false;
+  var msg, statussilent = false, ttw;
   return {
     command : '!!status',
+    ttw: function() {return ttw},
     events: [1],
     next: function () {
       var u, usr;
@@ -60,6 +61,8 @@ function Status(bot) {
         });
         
         bot.send(msg);
+         ttw = new Date();
+        ttw.setMinutes(ttw.getMinutes() + 6);
         setTimeout(function () { statussilent = false; }, util.minutes(6));
         statussilent = true;
       }
