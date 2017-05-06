@@ -68,7 +68,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     return new Promise(executor);
   }
 
-  ChatRoom.prototype.postInfo = function  (userIds, forceReload) {
+  ChatRoom.prototype.postInfo = function  (userIds, forcedIds) {
 
    // var url = serverbase + '/user/info';
     var users;
@@ -76,16 +76,13 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     this.emit('action', 'info');
     
     function cleanUserIds(userIds) {
-      var clean = [];
-      if (forceReload !== true) {
-        userIds.forEach(function(user){
-          if (self.seenUsers[user] === undefined) {
-            clean.push(user);
-          } 
-        });
-      } else {
-        clean = userIds || [];
-      }
+      var clean = forcedIds || [];
+      userIds.forEach(function(user){
+        if (self.seenUsers[user] === undefined) {
+          clean.push(user);
+        } 
+      });
+
       return clean;
     }
     
@@ -145,7 +142,8 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           respParser.then((wsresp) => { 
             console.log(wsresp.url + '?l=' + time);
              // wsresp.url + '?l=' + time
-            self.ws = WebsocketListener.StartWebSocketListener(wsresp.url + '?l=' + time, thisRoomInstance);
+            var handler =  new WebsocketListener.SocketHandler(self);
+            self.ws = WebsocketListener.StartWebSocketListener(wsresp.url + '?l=' + time, serverbase,  handler);
             console.log('websocket created');  
           })
           resolve();

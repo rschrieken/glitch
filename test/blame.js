@@ -45,4 +45,19 @@ describe('Bot commands', function() {
       
     });
   });
+  
+  describe('blame a user', function() {
+    it('sends blame to user with a ping', function(done) {
+      var bot = {
+        seenUsers: function() { return {42: {name: 'foo', cnt:1}} },
+        send: function(m) { 
+          assert.ok(m.indexOf('@foo') > 0); 
+          assert.ok(m.indexOf('for @fubar') > 0); 
+          done() }
+      }
+      var command = new require('../bots/commands/blame.js')(bot);
+      command.next({message_id:42}, '@fubar');
+      
+    });
+  });
 });
