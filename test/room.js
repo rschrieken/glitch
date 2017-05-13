@@ -93,7 +93,7 @@ describe('Chatroom', () => {
     mockBrowser.setpostdata('{"users":[{"id":1337,"displayName":"fubar"}]}');
     var hnd = new ws.SocketHandler(room);
     
-    hnd.message({data:'{"r1337":{"e":[{"event_type":34, "user_id":1337}]}}'})
+    hnd.message({data:'{"r1337":{"e":[{"event_type":34, "target_user_id":1337}]}}'})
     setTimeout(()=>{
       assert.equal(room.seenUsers[1337].displayName,'fubar');
       done();

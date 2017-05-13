@@ -61,7 +61,7 @@ function SocketHandler(roomInstance) {
             add(event.user_id);
             break;
           case EventType.UserNameOrAvatarChanged:
-            addForced(event.user_id);
+            addForced(event.target_user_id);
             break;
           default:
             break;
