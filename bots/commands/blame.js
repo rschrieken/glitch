@@ -7,6 +7,10 @@ function Blame(bot) {
     return Math.floor(Math.random() * (max - min)) + min;
   }
   
+  function pingUser(username) {
+    return username !== undefined ? '@' + username.replace(' ',''): 'nobody'
+  }
+  
   return {
     command : '!!blame', 
     ttw: function() {return ttw},
@@ -29,8 +33,8 @@ function Blame(bot) {
           bot.send(
             ':' + 
             ce.message_id + 
-            ' blames @' + 
-            usr.name + 
+            ' blames ' + 
+            pingUser(usr.name) + 
             ' for ' + 
             ((arg === undefined || (typeof arg === 'string' && arg.length ===0)) ? 'everything': arg));
           nextTime = new Date();

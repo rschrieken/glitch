@@ -127,9 +127,10 @@ function init(roomInstance) {
     send: messagePoster.send,
     silence: messagePoster.silent,
     started: started,
-    seenUsers: function () {return roomInstance === undefined?{}:roomInstance.seenUsers },
+    seenUsers: function () {return roomInstance.seenUsers },
     states: statesAccessor,
-    oncmd: cmdEmitter
+    oncmd: cmdEmitter,
+    getHostname: roomInstance.getHostname
   });
   
   room = roomInstance;

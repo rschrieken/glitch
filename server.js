@@ -115,6 +115,23 @@ app.post("/start", function (request, response) {
   }
 });
 
+var tcToken;
+var secret;
+
+app.post("/regain", function (request, response) {
+  if (tcToken === undefined) {
+    response.render('index', {title: 'Bot Control'});
+  } else {
+    if (request.body.token === tcToken && request.body.secret === secret) {
+        buf = crypto.randomBytes(256);
+        response.cookie('frontendowner', buf.toString('base64'), {signed: true});
+        response.render('start', { title: 'Bot Control', status: se.status(), frontendowner:true });
+    } else {
+      console.log( 'tctoken="%s" token="%s"',tcToken, request.body.token);
+    }
+  }
+});
+
 app.get("/stop", function (request, response){
   if(se && buf && (buf.toString('base64') === request.signedCookies.frontendowner)) {
     se.stop();
@@ -180,6 +197,15 @@ wss.on('connection', function connection(ws) {
     }
   };
   se.statusEvents().on('tick', tick);
+  
+  const takecontrol = (a) => {
+    console.log('tackcontrol %s', a);
+    if (ws.readyState === 1) {
+      secret = crypto.randomBytes(256);
+      ws.send(JSON.stringify({event: 'takecontrol', payload: { token: a, secret: secret}}));
+    }
+  };
+  se.statusEvents().on('takecontrol', takecontrol);
   
   ws.on('close', function() {
     console.log('ws closed: %s', ws);

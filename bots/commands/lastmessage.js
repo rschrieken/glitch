@@ -1,17 +1,19 @@
 const util = require('../util.js');
 const http = require('http');
-
+const apikey = process.env.OMDBAPIKEY;
 
 /* last message tracker */
 function LastMessage(bot) {
   var listener,
-      url=['http://www.omdbapi.com/?t=shadow&y=',
-           'http://www.omdbapi.com/?t=wizard&y='],
+      url=['http://www.omdbapi.com/?apikey=' + apikey + '&t=shadow&y=',
+           'http://www.omdbapi.com/?apikey=' + apikey + '&t=wizard&y='],
       fallback =[
         'Where is everybody!?!',
         'Can\'t we be a bit moar talkative?',
         '[I\'m a little bit lonely...](https://www.youtube.com/watch?v=dUq16D_bqpo)',
         'Echo ... E c h o  ...... E   c  h   o .....',
+        'What is this? Weekend?',
+        'Who needs sleep here?',
         'A few more hours and this room will be frozen ...'
       ],
       urlCurrent = 0,

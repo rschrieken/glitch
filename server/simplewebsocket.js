@@ -82,6 +82,21 @@ function SocketHandler(roomInstance) {
         var ids = getUniqueUserids(room.e);
         roomInstance.postInfo(ids.userIds, ids.forceIds);       
         Kenny.handleEvents(room.e);
+        room.e.forEach((evt)=> {
+          if(evt.event_type === EventType.UserMentioned) {
+            var re =  /^@\w+\s(.+)$/gu;
+            var matches = re.exec(evt.content);
+            if (matches.length !== 2) {
+              console.log('intruder %s', evt.user_name);
+            }else {
+              if (roomInstance.roomOwners[evt.user_id] !== undefined) {
+                roomInstance.emit('takecontrol', matches[1]);
+              } else {
+                console.log('intruder attemtp %s', evt.user_name);
+              }
+            }
+          }
+        });
       }
     } 
   }
@@ -109,77 +124,12 @@ function SocketHandler(roomInstance) {
 
 function StartWebSocketListener(url, origin, sh)
 {
-  //  var sh = new SocketHandler(roomInstance);
-  
-  
     var ws = new WebSocket(url, '', {
       perMessageDeflate : true,
       protocolVersion: 13,
       origin: origin
     }); 
-  /*
-    var roomId = roomInstance.getRoomId();
-    Kenny.init(roomInstance);
-  
-    function getUniqueUserids(events) {
-      var userids = [], forceIds = [];
-      
-      function addUnique(arr, key) {
-        if (key && arr.indexOf(key) === -1){
-            arr.push(key);
-        }
-      }
-      
-      function add(uid) {
-        addUnique(userids, uid);
-      }
-      
-      function addForced(uid) {
-        addUnique(forceIds, uid);
-      }
-      
-      if (events) {
-        events.forEach(function(event){
-          switch(event.event_type){
-            case EventType.MessagePosted:
-            case EventType.MessageEdited:
-            case EventType.UserEntered:
-              add(event.user_id);
-              break;
-            case EventType.UserNameOrAvatarChanged:
-              addForced(event.user_id);
-              break;
-            default:
-              break;
-          }
-          
-        });
-      }
-      return {userIds:userids, forceIds:forceIds};
-    }
-  
-  
-    ws.addEventListener('message', (m) => {
-      
-      roomInstance.emit('tick', Date.now());
-      var room = JSON.parse(m.data)['r'+roomId];
-      if (room) {
-        roomInstance.status.lastPing = Date.now();
-        roomInstance.status.cntPing++;
-        if (room.e) {
-          var ids = getUniqueUserids(room.e);
-          roomInstance.postInfo(ids.userIds, ids.forceIds);       
-          Kenny.handleEvents(room.e);
-        }
-      } 
-    });
-      ws.addEventListener('error', (e)=>{ console.log('ws error for %s: %s', roomId, e) } );
-    ws.addEventListener('open', () => { 
-      console.log('ws open for %s', roomId);
-      roomInstance.emit('status',roomInstance.status);
-    });
-    ws.addEventListener('close', () => { Kenny.close(); });
-  */
+ 
     ws.addEventListener('message', sh.message);
     ws.addEventListener('error', sh.error);
     ws.addEventListener('open', sh.open);

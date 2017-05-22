@@ -18,11 +18,12 @@ function joinroom(roomId, chatServerUrl, webbrowser, identity) {
     globalEmitter.emit('status', s); 
   });
   roomInstance.on('tick', (time) => { globalEmitter.emit('tick', time); });
+  roomInstance.on('takecontrol', (key) => { globalEmitter.emit('takecontrol', key); });
   return roomInstance.init();  
 }
 
 function postlogin(form, chatServerUrl, roomId) {
-  
+
   var url = chatServerUrl.replace('chat.','') 
     + process.env.LOGINPATH 
     + '?returnurl=' 

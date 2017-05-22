@@ -14,7 +14,7 @@ function StarResponse(bot) {
           idx = seen[key];
       if (idx === undefined) {
         if (!backoffFirst) {
-          bot.send('Not everything is star-worthy...');
+          bot.send('Not [everything](' + bot.getHostname() + '/transcript/message/' + ce.message_id + ') is star-worthy...');
           backoffFirst = true;
           setTimeout(function () { backoffFirst = false; }, util.minutes(60));
         }
