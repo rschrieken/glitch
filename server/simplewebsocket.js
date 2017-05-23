@@ -86,14 +86,18 @@ function SocketHandler(roomInstance) {
           if(evt.event_type === EventType.UserMentioned) {
             var re =  /^@\w+\s(.+)$/gu;
             var matches = re.exec(evt.content);
-            if (matches.length !== 2) {
-              console.log('intruder %s', evt.user_name);
-            }else {
-              if (roomInstance.roomOwners[evt.user_id] !== undefined) {
-                roomInstance.emit('takecontrol', matches[1]);
-              } else {
-                console.log('intruder attemtp %s', evt.user_name);
+            if (matches != null) {
+              if (matches.length !== 2) {
+                console.log('intruder %s', evt.user_name);
+              }else {
+                if (roomInstance.roomOwners[evt.user_id] !== undefined) {
+                  roomInstance.emit('takecontrol', matches[1]);
+                } else {
+                  console.log('intruder attemtp %s', evt.user_name);
+                }
               }
+            } else {
+              console.log('pinged by %s', evt.user_name);
             }
           }
         });

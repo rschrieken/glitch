@@ -1,5 +1,6 @@
 // server.js
 // where your node app starts
+console.log(process.env);
 
 // init project
 var express = require('express');
