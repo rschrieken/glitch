@@ -6,6 +6,7 @@ function Wipe(bot) {
       command : '!!wipe',
       events: [1],
       next: function () {
+        bot.oncmd.emit('wipe', {state: i});
         switch (i) {
         case 0:
           bot.send('https://i.stack.imgur.com/LpgOW.jpg');

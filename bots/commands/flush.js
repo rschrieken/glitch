@@ -1,6 +1,6 @@
 const util = require('../util.js'); // time utils
 
-// bot is in the intance which gives access to the actual chat bot
+// bot is in the instance which gives access to the actual chat bot
 function Flush(bot) {
     var i = 0, // keeps state
         ttw;

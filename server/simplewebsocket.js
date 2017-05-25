@@ -93,7 +93,7 @@ function SocketHandler(roomInstance) {
                 if (roomInstance.roomOwners[evt.user_id] !== undefined) {
                   roomInstance.emit('takecontrol', matches[1]);
                 } else {
-                  console.log('intruder attemtp %s', evt.user_name);
+                  console.log('intruder attempt %s', evt.user_name);
                 }
               }
             } else {

@@ -34,6 +34,7 @@ function MessagePoster(room, prepend) {
         console.log(txt);
     } else {
       try {
+        
         room.postMessage(txt).then(() => {if (throttle > util.seconds(2)) {
               throttle = throttle - Math.round(throttle / 4);
               if (throttle < util.seconds(2)) {

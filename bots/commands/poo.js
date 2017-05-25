@@ -4,6 +4,13 @@ const util = require('../util.js');
 function Poo(bot) {
   var cmd = '!!poo', num = 1;
 
+  bot.oncmd.on('wipe', (arg)=>{
+    console.log(arg);
+    if (arg.state > 1) {
+      num = 1;
+    }
+  });
+  
   function stateHandler(ce) {
     var msg = '';
     for(var i=0; i<num; i++) {
