@@ -2,11 +2,11 @@ const util = require('../util.js');
 const http = require('http');
 const parseString = require('xml2js').parseString;
 
-/* last message tracker */
+/* post a cat gif */
 function Cat(bot) {
   var listener;
     
-  function fetchCatXml(cb) {
+  function fetchCatXml(cat, cb) {
     
     function findUrl(item) {
       if (item === undefined || item === null ) {
@@ -27,7 +27,8 @@ function Cat(bot) {
       return "no cats today";
     }
     
-    var fetchUrl = "http://thecatapi.com/api/images/get?format=XML&results_per_page=1";
+    var fetchUrl = "http://thecatapi.com/api/images/get?format=XML&results_per_page=1" + (cat.length > 1 ?"&category="+cat:"")
+    console.log(fetchUrl);
     http.get(fetchUrl , (res) => {
       res.setEncoding('utf8');
       let rawData = '';
@@ -46,18 +47,21 @@ function Cat(bot) {
             
         } catch (e) {
           console.error(e.message);
+          cb('cat in parse error');
         }
       });
     }).on('error', (e) => {
       console.error(`Got error: ${e.message}`);
-      cb({});
+      cb('cat in error');
     });
   }
   
-  function stateHandler(ce) {
+  function stateHandler(ce, category) {
     var silent = false;
+    // handle category
+    // http://thecatapi.com/api/categories/list
     if (!silent) {
-      fetchCatXml(function(data){
+      fetchCatXml(category, function(data){
          if (data ) {
            bot.send(':' + ce.message_id + ' ' + data);
            silent = true;

@@ -73,6 +73,7 @@ function SocketHandler(roomInstance) {
   }
     
   function message(m) {
+    console.log('message: ', m.data);
     roomInstance.emit('tick', Date.now());
     var room = JSON.parse(m.data)['r'+roomId];
     if (room) {
@@ -115,6 +116,7 @@ function SocketHandler(roomInstance) {
   }
   
   function close() {
+    console.log('ws close for %s', roomId);
     Kenny.close();
   }
   
@@ -133,11 +135,42 @@ function StartWebSocketListener(url, origin, sh)
       protocolVersion: 13,
       origin: origin
     }); 
- 
+   
+    var alive = false;
+    ws.addEventListener('message', () =>{
+      alive = true;
+    });
     ws.addEventListener('message', sh.message);
     ws.addEventListener('error', sh.error);
     ws.addEventListener('open', sh.open);
     ws.addEventListener('close', sh.close);
+    
+    setInterval(()=>{
+      if (!alive) {
+        console.log('ws not alive');
+        ws.removeEventListener('message', sh.message);
+        ws.removeEventListener('error', sh.error);
+        ws.removeEventListener('open', sh.open);
+        ws.removeEventListener('close', sh.close);
+        // re-init
+        console.log('ws re-init');
+        ws = new WebSocket(url, '', {
+          perMessageDeflate : true,
+          protocolVersion: 13,
+          origin: origin
+        }); 
+        ws.addEventListener('message', () =>{
+          alive = true;
+        });
+        ws.addEventListener('message', sh.message);
+        ws.addEventListener('error', sh.error);
+        ws.addEventListener('open', sh.open);
+        ws.addEventListener('close', sh.close);
+        console.log('ws rebind eventhandlers ');
+      }
+      alive = false;
+    } ,70*1000);
+  
     return ws;
 }
 
