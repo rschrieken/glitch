@@ -117,58 +117,68 @@ function SocketHandler(roomInstance) {
   
   function close() {
     console.log('ws close for %s', roomId);
-    Kenny.close();
+    //Kenny.close();
   }
   
   return {
     message: message,
     open: open,
     error: error,
-    close: close
+    close: close,
+    room: roomInstance
   }
 }
 
 function StartWebSocketListener(url, origin, sh)
 {
     var ws = new WebSocket(url, '', {
-      perMessageDeflate : true,
-      protocolVersion: 13,
-      origin: origin
-    }); 
-   
-    var alive = false;
-    ws.addEventListener('message', () =>{
-      alive = true;
-    });
+        perMessageDeflate : true,
+        protocolVersion: 13,
+        origin: origin
+      }), 
+      alive = 0,
+      timer;
+    
+    function setAlive() { if (alive > 0) alive--;};
+  
+    ws.addEventListener('message', setAlive);
     ws.addEventListener('message', sh.message);
     ws.addEventListener('error', sh.error);
     ws.addEventListener('open', sh.open);
     ws.addEventListener('close', sh.close);
+    ws.on('close', (c,r) => { 
+      console.log('websocket close handling %d',c);
+      if (c === 1000) {
+        clearInterval(timer);
+      }
+    });
+  
+    ws.on('pong', () =>{ console.log('ws pong') });
+    ws.on('ping', () =>{ console.log('ws ping') });
     
-    setInterval(()=>{
-      if (!alive) {
-        console.log('ws not alive');
+    timer = setInterval(()=>{
+      if (alive > 0) {
+        console.warn('websocket not alive for %d seconds', alive * 70 );
+      }
+      if (alive > 2) {
+        console.error('ws not alive');
+        
+        ws.removeEventListener('message', setAlive);
         ws.removeEventListener('message', sh.message);
         ws.removeEventListener('error', sh.error);
         ws.removeEventListener('open', sh.open);
         ws.removeEventListener('close', sh.close);
         // re-init
         console.log('ws re-init');
-        ws = new WebSocket(url, '', {
-          perMessageDeflate : true,
-          protocolVersion: 13,
-          origin: origin
-        }); 
-        ws.addEventListener('message', () =>{
-          alive = true;
+        sh.room.postEvents(1).then((ws) => {
+          console.info('websocket retry post events', ws);
+          sh.room.postWSauth(ws.time, sh).then( () => {
+             console.log('ws restarted');    
+             clearInterval(timer);
+          })
         });
-        ws.addEventListener('message', sh.message);
-        ws.addEventListener('error', sh.error);
-        ws.addEventListener('open', sh.open);
-        ws.addEventListener('close', sh.close);
-        console.log('ws rebind eventhandlers ');
       }
-      alive = false;
+      alive++;
     } ,70*1000);
   
     return ws;

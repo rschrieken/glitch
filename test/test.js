@@ -110,13 +110,17 @@ describe('Poster', () => {
     });
   });
   
-  describe('owmMessage', () => {
-    it('should return a length', () => {
+  describe('ownMessage', () => {
+    it('should return a length', (done) => {
       var msgposter = new poster.MessagePoster(room);
       var len = msgposter.ownMessageReceived();
-      assert.equal(2 , len);
-      len = msgposter.ownMessageReceived();
-      assert.equal(3 , len);
+      assert.equal(1 , len);
+      setTimeout(() => {
+        len = msgposter.ownMessageReceived();
+        assert.equal(2 , len);
+        done();
+      }, 100);
+      
     });
   });
   
@@ -164,6 +168,37 @@ describe('Poster', () => {
       msgposter.silent(true);
       assert.doesNotThrow(() => {msgposter.send('fubar')});
       setTimeout(done,3000);
+    });
+  });
+  
+  describe('throttle clears', () => {
+    it('should post once throttle is over', function (done) {
+      var timer;
+      this.timeout(10000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = function() {done(); clearTimeout(timer);};
+      msgposter.ownMessageReceived();
+      msgposter.ownMessageReceived();
+      msgposter.ownMessageReceived();
+      assert.doesNotThrow(() => {msgposter.send('fubar')});
+      timer = setTimeout( () => {done('throttled!')},9000);
+    });
+  });
+  
+  describe('throttle clears for different timings', () => {
+    it('should post once throttle is over', function (done) {
+      var timer;
+      this.timeout(10000);
+      var msgposter = new poster.MessagePoster(room);
+      cb = function() {done(); clearTimeout(timer);};
+      msgposter.ownMessageReceived();
+      msgposter.ownMessageReceived();
+      setTimeout(() => {msgposter.ownMessageReceived();}, 100);
+      setTimeout(() => {msgposter.ownMessageReceived();}, 200);
+      setTimeout(() => {msgposter.ownMessageReceived();}, 300);
+      assert.doesNotThrow(() => {msgposter.send('fubar')});
+      
+      timer = setTimeout( () => {done('throttled!')},9000);
     });
   });
   

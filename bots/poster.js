@@ -49,10 +49,13 @@ function MessagePoster(room, prepend) {
   }
 
   function ownMessageReceived() {
+    var now = Date.now();
     if (ownmsg.length > 100) {
       ownmsg.shift();
     }
-    ownmsg.push(Date.now());
+    if (ownmsg.length === 0 || ( ownmsg.length > 0 && ownmsg[0] !== now)) {
+       ownmsg.push(now);
+    }
     return ownmsg.length;
   }
   

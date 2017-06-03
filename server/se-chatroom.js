@@ -126,7 +126,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     return new Promise(executor);
   }
 
-  ChatRoom.prototype.postWSauth = function (time) {
+  ChatRoom.prototype.postWSauth = function (time, handler) {
       //var url = serverbase + '/ws-auth';
       var self = this;
       this.emit('action', 'ws-auth');
@@ -140,10 +140,11 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           var respParser = new ResponseParser('json', res); 
 
           respParser.then((wsresp) => { 
+            var socketHandler;
             console.log(wsresp.url + '?l=' + time);
              // wsresp.url + '?l=' + time
-            var handler =  new WebsocketListener.SocketHandler(self);
-            self.ws = WebsocketListener.StartWebSocketListener(wsresp.url + '?l=' + time, serverbase,  handler);
+            socketHandler = handler || new WebsocketListener.SocketHandler(self);
+            self.ws = WebsocketListener.StartWebSocketListener(wsresp.url + '?l=' + time, serverbase,  socketHandler);
             console.log('websocket created');  
           })
           resolve();
