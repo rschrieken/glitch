@@ -73,6 +73,10 @@ function SocketHandler(roomInstance) {
   }
     
   function message(m) {
+    if (Buffer.isBuffer(m.data)) {
+      console.log('pong recv:', m.data.length);
+      return;
+    }
     console.log('message: ', m.data);
     roomInstance.emit('tick', Date.now());
     var room = JSON.parse(m.data)['r'+roomId];
@@ -137,6 +141,7 @@ function StartWebSocketListener(url, origin, sh)
         origin: origin
       }), 
       alive = 0,
+      EXPECT_HEARTBEAT_SECONDS = 35,
       timer;
     
     function setAlive() { if (alive > 0) alive--;};
@@ -156,9 +161,15 @@ function StartWebSocketListener(url, origin, sh)
     ws.on('pong', () =>{ console.log('ws pong') });
     ws.on('ping', () =>{ console.log('ws ping') });
     
+    setTimeout(()=>{
+      ws.ping('',true,true);
+      console.log('ping send ...');
+    }, 15000)
+  
     timer = setInterval(()=>{
       if (alive > 0) {
-        console.warn('websocket not alive for %d seconds', alive * 70 );
+        console.warn('websocket not alive for %d seconds', alive * EXPECT_HEARTBEAT_SECONDS );
+        ws.ping('',false,true);
       }
       if (alive > 2) {
         console.error('ws not alive');
@@ -179,7 +190,7 @@ function StartWebSocketListener(url, origin, sh)
         });
       }
       alive++;
-    } ,70*1000);
+    } ,EXPECT_HEARTBEAT_SECONDS * 1000);
   
     return ws;
 }

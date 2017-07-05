@@ -17,7 +17,7 @@ var //commandCollection = [],
     started = Date.now();
     
 function handleEvent(ce) {
-  var i, commandExecuted, length, state, cmdRegex = /^(!!\w+)($|\s(\w*))/, cmd;
+  var i, commandExecuted, length, state, cmdRegex = /^(!!\w+)($|\s(.*))/, cmd;
       commandExecuted = false;
   if ((ce.user_id === room.getUserid() || 
        room.roomOwners[ce.user_id] !== undefined) &&

@@ -7,7 +7,7 @@ function Feed(bot) {
       resp = [
         'I bloody hope {0} is edible ...',
         'I\'m not sure I ever had {0} ...',
-        'The taste of {0} is awful but it\'s better as nothing ..',
+        'The taste of {0} is awful but it\'s better than nothing ..',
         'Thanks for the {0}, appreciated!'
       ];
   
