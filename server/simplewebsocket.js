@@ -171,7 +171,7 @@ function StartWebSocketListener(url, origin, sh)
         console.warn('websocket not alive for %d seconds', alive * EXPECT_HEARTBEAT_SECONDS );
         ws.ping('',false,true);
       }
-      if (alive > 2) {
+      if (alive === 3) {
         console.error('ws not alive');
         
         ws.removeEventListener('message', setAlive);
@@ -188,6 +188,9 @@ function StartWebSocketListener(url, origin, sh)
              clearInterval(timer);
           })
         });
+      }
+      if (alive > 3) {
+        console.warn('websocket: no restart after %d seconds', alive * EXPECT_HEARTBEAT_SECONDS);
       }
       alive++;
     } ,EXPECT_HEARTBEAT_SECONDS * 1000);
