@@ -142,7 +142,8 @@ function StartWebSocketListener(url, origin, sh)
       }), 
       alive = 0,
       EXPECT_HEARTBEAT_SECONDS = 35,
-      timer;
+      timer,
+      reconnecting = false;
     
     function setAlive() { if (alive > 0) alive--;};
   
@@ -166,6 +167,28 @@ function StartWebSocketListener(url, origin, sh)
       console.log('ping send ...');
     }, 15000)
   
+    function reconnect() {
+      if (reconnecting) {
+        console.warn('a pevious reconnect is still going');
+      } else {
+        reconnecting = true;
+        sh.room.postEvents(1).then((ws) => {
+          console.info('websocket retry post events', ws);
+          sh.room.postWSauth(ws.time, sh).then( () => {
+             console.log('ws restarted');    
+             reconnecting = false;
+             clearInterval(timer);
+          }, ()=> {
+            console.error('ws retry for post ws auth failed ');
+            reconnecting = false;
+          });
+        }, () => {
+          console.error('ws retry for post events failed ');
+          reconnecting = false;
+        });
+      }
+    }
+  
     timer = setInterval(()=>{
       if (alive > 0) {
         console.warn('websocket not alive for %d seconds', alive * EXPECT_HEARTBEAT_SECONDS );
@@ -173,7 +196,7 @@ function StartWebSocketListener(url, origin, sh)
       }
       if (alive === 3) {
         console.error('ws not alive');
-        
+        // give up on the current websocket, we're going to create a new one
         ws.removeEventListener('message', setAlive);
         ws.removeEventListener('message', sh.message);
         ws.removeEventListener('error', sh.error);
@@ -181,16 +204,12 @@ function StartWebSocketListener(url, origin, sh)
         ws.removeEventListener('close', sh.close);
         // re-init
         console.log('ws re-init');
-        sh.room.postEvents(1).then((ws) => {
-          console.info('websocket retry post events', ws);
-          sh.room.postWSauth(ws.time, sh).then( () => {
-             console.log('ws restarted');    
-             clearInterval(timer);
-          })
-        });
+        reconnect();
       }
       if (alive > 3) {
         console.warn('websocket: no restart after %d seconds', alive * EXPECT_HEARTBEAT_SECONDS);
+        // re-init
+        reconnect();
       }
       alive++;
     } ,EXPECT_HEARTBEAT_SECONDS * 1000);
