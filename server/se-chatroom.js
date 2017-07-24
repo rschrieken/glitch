@@ -148,7 +148,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
             console.log('websocket created');  
           })
           resolve();
-        });
+        }).catch(reject);
       }
 
       return new Promise(executor);
@@ -170,7 +170,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
         then( (res) => { 
           var respParser = new ResponseParser('json', res); 
           respParser.then(resolve)
-        });
+        }).catch(reject);
       }
 
       return new Promise(executor);

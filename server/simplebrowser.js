@@ -53,7 +53,7 @@ function Browser(dummyjar) {
           opt.host = opt.hostname || options.hostname;
           // TODO:add some handling for redirect loops?
           console.log('redirect ' + URL.format(opt));
-          get(URL.format(opt)).then(resolve);
+          get(URL.format(opt)).then(resolve).catch(reject);
         } else {
           if (res.statusCode > 399) {
             console.log('request %i, %s', res.statusCode, options.path);
