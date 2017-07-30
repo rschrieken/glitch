@@ -40,6 +40,14 @@ function Cat(bot) {
                 console.log(err);
               } else {
                 var caturl = findUrl(result);
+                const regex = /^(http|https):\/\/(\d+)\..*/gi;
+                var match = regex.exec(caturl);
+                if (match !== null && match.length === 3 ) {
+                  var key = Number.parseInt(match[2],10);
+                  if (key !== NaN && key > 25) {
+                    caturl = caturl.replace(match[1] + ':\/\/' + match[2], match[1] + ':\/\/25' )
+                  }
+                }
                 cb(caturl);  
               }
               
