@@ -16,6 +16,7 @@ function LastMessage(bot) {
         'Who needs sleep here?',
         'A few more hours and this room will be frozen ...'
       ],
+      previousTitle,
       urlCurrent = 0,
       fallbackCurrent = 0,
       minutesToNext = 60,
@@ -98,8 +99,9 @@ function LastMessage(bot) {
     }
     
     fetchOmdbJson(function(data){
-       if (data && data.Response && data.Response === 'True' && data.Title) {
+       if (data && data.Response && data.Response === 'True' && data.Title && data.Title !== previousTitle) {
          bot.send(data.Title);
+         previousTitle = data.Title;
          restart();
        } else {
          if (final) {
