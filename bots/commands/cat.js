@@ -4,7 +4,7 @@ const parseString = require('xml2js').parseString;
 
 /* post a cat gif */
 function Cat(bot) {
-  var listener;
+  var listener, categories, categoriePromise;
     
   function fetchCatXml(cat, cb) {
     
@@ -27,41 +27,98 @@ function Cat(bot) {
       return "no cats today";
     }
     
-    var fetchUrl = "http://thecatapi.com/api/images/get?format=XML&results_per_page=1" + (cat.length > 1 ?"&category="+cat:"")
-    console.log(fetchUrl);
-    http.get(fetchUrl , (res) => {
-      res.setEncoding('utf8');
-      let rawData = '';
-      res.on('data', (chunk) => { rawData += chunk; });
-      res.on('end', () => {
-        try {
-            parseString(rawData, function (err, result) {
-              if (err) {
-                console.log(err);
-              } else {
-                var caturl = findUrl(result);
-                const regex = /^(http|https):\/\/(\d+)\..*/gi;
-                var match = regex.exec(caturl);
-                if (match !== null && match.length === 3 ) {
-                  var key = Number.parseInt(match[2],10);
-                  if (key !== NaN && key > 25) {
-                    caturl = caturl.replace(match[1] + ':\/\/' + match[2], match[1] + ':\/\/25' )
-                  }
+    function safe(item, key) {
+      //console.log('safe: ', item, key);
+      item = Array.isArray(item)?item[0]:item;
+      return (item || {} )[key] || {};
+    }
+    
+    function getCategories() {
+      var url = 'http://thecatapi.com/api/categories/list';
+      if (categoriePromise === undefined) {
+        categoriePromise = new Promise((resolve, reject) => {
+          http.get(url, (res)=> {
+            console.log('getcategories called');
+            res.setEncoding('utf8');  
+            let rawData = '';
+            res.on('data', (chunk) => { rawData += chunk; });
+            res.on('end', () => {
+              parseString(rawData, function (err, result) {
+                if (err) {
+                  reject(err);
+                  return;
                 }
-                cb(caturl);  
-              }
-              
+                var categorieList = safe(safe(safe(safe(result,'response'), 'data'),'categories'),'category');
+                if (Array.isArray(categorieList)) {
+                  categories = [];
+                  categorieList.forEach(function(item) {
+                    console.log(item);
+                    categories.push(item.name[0]);
+                  });
+                } else {
+                  console.log('category rawdata', rawData);
+                  console.log('category result', result);
+                  console.log('category result.response', result.response);
+                  console.log('category result.response.data', result.response.data);
+                  console.log('category result.response.data.categories', result.response.data[0].categories);
+                  console.log(categorieList);
+                }
+                resolve(categories);
+              });  
             });
-            
-        } catch (e) {
-          console.error(e.message);
-          cb('cat in parse error');
+          });
+        });
+        
+      }
+      return categoriePromise;
+    }
+    
+    function init(cat) 
+    {
+      getCategories().then((catlist) => {
+        if(cat && cat.length > 0 && catlist.indexOf(cat) === -1) {
+          cb('I only know these categories: ' + catlist.join(', '));
+          cat = undefined;
         }
+        var fetchUrl = "http://thecatapi.com/api/images/get?format=XML&results_per_page=1" + (cat?"&category="+cat:"")
+        console.log(fetchUrl);
+        http.get(fetchUrl , (res) => {
+          res.setEncoding('utf8');
+          let rawData = '';
+          res.on('data', (chunk) => { rawData += chunk; });
+          res.on('end', () => {
+            try {
+                parseString(rawData, function (err, result) {
+                  if (err) {
+                    console.log(err);
+                  } else {
+                    var caturl = findUrl(result);
+                    const regex = /^(http|https):\/\/(\d+)\..*/gi;
+                    var match = regex.exec(caturl);
+                    if (match !== null && match.length === 3 ) {
+                      var key = Number.parseInt(match[2],10);
+                      if (key !== NaN && key > 25) {
+                        caturl = caturl.replace(match[1] + ':\/\/' + match[2], match[1] + ':\/\/25' )
+                      }
+                    }
+                    cb(caturl);  
+                  }
+
+                });
+
+            } catch (e) {
+              console.error(e.message);
+              cb('cat in parse error');
+            }
+          });
+        }).on('error', (e) => {
+          console.error(`Got error: ${e.message}`);
+          cb('cat in error');
+        });  
       });
-    }).on('error', (e) => {
-      console.error(`Got error: ${e.message}`);
-      cb('cat in error');
-    });
+      
+    }
+    init(cat.length > 1?cat.trim():null);
   }
   
   function stateHandler(ce, category) {

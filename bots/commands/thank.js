@@ -12,9 +12,11 @@ function Thank(bot) {
   }
   
   function find(usernames , name) {
-    for(var i=0; i < usernames.length; i++) {
-      console.log('%s===%s', usernames[i], name);
-      if (usernames[i].length > 0 && name.indexOf(usernames[i].replace('@','')) === 0) {
+    var i, username, chatname = name.toLowerCase().trim();
+    for(i=0; i < usernames.length; i++) {
+      username = usernames[i].toLowerCase.trim().replace('@','');
+      console.log('%s===%s', username, chatname);
+      if (username.length > 0 && chatname.indexOf(username) === 0) {
         return usernames[i];
       }
     }
