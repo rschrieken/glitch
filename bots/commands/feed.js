@@ -9,7 +9,7 @@ function Feed(bot) {
         'I\'m not sure I ever had {0} ...',
         'The taste of {0} is awful but it\'s better than nothing ..',
         'Thanks for the {0}, appreciated!',
-        'Did n\'t I had {0} before?',
+        'Didn\'t I had {0} before?',
         'Come on! Make me something better than {0}',
         'No Pizza?'
       ], 
