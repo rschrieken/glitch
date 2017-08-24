@@ -102,10 +102,8 @@ function stop () {
   roomInstance = null;
 }
 
-function login (user, pwd, roomId, server) {
-  
-  var loginurl, serverbase;
-  
+function getServerUrl(server) {
+  var serverbase;
   switch(server) {
     case '1':
       serverbase = process.env.SERVERBASE1;
@@ -117,10 +115,16 @@ function login (user, pwd, roomId, server) {
       serverbase = process.env.SERVERBASE3;
       break;
   }
+  return serverbase;
+}
+
+function login (user, pwd, roomId, server) {
+  
+  var loginurl, serverbase;
+  
+  serverbase = getServerUrl(server);
     
   loginurl = serverbase.replace('chat.','') + process.env.LOGINPATH;
-  
-  
   
   function executor(resolve,reject) {
     // universal auth is not that universal
@@ -175,10 +179,71 @@ function login (user, pwd, roomId, server) {
   return new Promise(executor);
 };
 
+function autologin(server, roomId, userid, password) {
+  var serverUrl = getServerUrl(server); 
+  
+  function executor(resolve, reject)
+  {
+    
+    function login(url) {
+      webbrowser.get(url).then((res)=>{
+        var respParser = new ResponseParser('fkey',res);
+        respParser.then((fkeyresp)=>{
+          console.log(fkeyresp);
+        });
+      });
+    }
+    
+    function needlogin(s) {
+      console.warn('need to login', s);
+      if (userid === undefined || password === undefined )
+      {
+        //without a user or pwd it is no use of proceeding
+         resolve({ needlogin: true, url: s.url, fkey: s.fkey});
+      } else {
+        // let's try to login
+        // this should bring you on the login 
+        login(s.url);
+      }
+    }
+    
+    function cookiebasedlogin(s) {
+      const regex = /^\/users\/(\d+)\/.*$/g;
+      var matches = regex.exec(s.url);
+      if (matches != null && matches.length >0) {
+        s.userid = matches[1];
+        console.info('already logged in', s);  
+        joinroom(roomId, serverUrl, webbrowser, s).then(resolve).catch(reject);              
+      } else {
+        console.warn('already logged in but no userid', s);  
+        reject('No auto login');
+      }
+    }
+    
+    function serverUrlParsedResponse(s) {
+      if (s.url && s.url.indexOf('\/users\/login?returnurl=http') > 0 && s.username === 'log in' ) {
+        needlogin(s);
+      } else {
+        cookiebasedlogin(s);
+      }
+    }
+    
+    function serverUrlResponse(res) {
+      var resp = new ResponseParser('mainchat', res);
+      resp.then(serverUrlParsedResponse);
+    }
+    
+    webbrowser.get(serverUrl)
+      .then(serverUrlResponse);
+  }
+  return new Promise(executor);
+}
+
 module.exports = function (browser) {
   webbrowser = new browser.Browser();
   return {
     login: login,
+    autologin: autologin,
     stop: stop,
     isInitialized: isInitialized,
     isLoginValid: isLoginValid,

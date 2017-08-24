@@ -171,6 +171,75 @@ function ResponseParser(type, response) {
     return new Promise(executor);
   }
   
+  function MainChatParser(res) {
+    var fkeyParsed, userurl, username, states = {
+      none: 0,
+      topbarlinks: 1,
+      linkscontainer: 2,
+      topbarmenulinks: 3,
+      topbarmenulinkstext: 4,
+      complete: 5
+    }, state = states.none;
+    function executor(resolve, reject) {
+      var parser = new htmlparser.Parser(
+         {
+           onopentag: function(tagname, attr) {
+             //console.log('%s, %d', tagname, state);
+             if (tagname === 'input' && attr.name && attr.name === 'fkey') {
+               fkeyParsed = attr.value;
+             }
+             switch(state){
+               case states.none:
+                 if (tagname === 'div' && attr.class && attr.class === 'topbar-links') {
+                   state = states.topbarlinks;
+                 }
+                 break;
+               case states.topbarlinks:
+                 if (tagname === 'div' && attr.class && attr.class === 'links-container') {
+                   state = states.linkscontainer;
+                 }
+                 break;
+              case states.linkscontainer:
+                 if (tagname === 'span' && attr.class && attr.class === 'topbar-menu-links') {
+                   state = states.topbarmenulinks;
+                 }
+                 break;
+              case states.topbarmenulinks:
+                 if (tagname === 'a' && attr.href) {
+                   userurl = attr.href;
+                   state = states.topbarmenulinkstext;
+                 }
+                 break;
+             }
+           },
+           ontext: function(text) {
+             if (state === states.topbarmenulinkstext) {
+               username = text;
+               state = states.complete;
+             }
+           }
+         },{ decodeEntities: true }
+      );
+      res.on('data', (d) => {
+         parser.write(d);
+      });
+      res.on('error', (error) => {
+        console.log(error);
+        reject(error);
+      });
+      res.on('end', (d) => {
+        parser.end();
+        if (state === states.complete && username && userurl) {
+          console.log('found login: "%s", %s', userurl, username);
+          resolve({username:username, url:userurl, fkey: fkeyParsed});
+        } else{
+          reject('parsing failed');
+        }
+      });
+    }
+    return new Promise(executor);
+  }
+  
   function JSONParser(res) {
     const decoder = new StringDecoder('utf8');
     var jsonstring = '';
@@ -199,6 +268,9 @@ function ResponseParser(type, response) {
       break;
     case 'ident':
       parserImpl = new IdentityParser(response);
+      break;
+    case 'mainchat':
+      parserImpl = new MainChatParser(response);
       break;
     case 'json':
       parserImpl = new JSONParser(response);

@@ -170,7 +170,8 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
         then( (res) => { 
           var respParser = new ResponseParser('json', res); 
           respParser.then(resolve)
-        }).catch(reject);
+        }, (err)=>{ console.error('events:',err); reject(err) }
+        ).catch(reject);
       }
 
       return new Promise(executor);

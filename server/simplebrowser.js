@@ -1,11 +1,18 @@
 const https = require('https');
+const http = require('http');
 const querystring = require('querystring');
 const tc = require('tough-cookie');
+const FileCookieStore = require('file-cookie-store');
 const URL = require('url');
 
 function Browser(dummyjar) {
   
-  const jar = new tc.CookieJar();
+  var store;
+  if (process.env.JARSTORE === 'FILE') {
+    store = new FileCookieStore(".data/cookie.txt")
+  } 
+  
+  const jar = new tc.CookieJar(store);
   var lastCookies = '';
   var currentUrl;
   
@@ -41,10 +48,11 @@ function Browser(dummyjar) {
   }
   
   function request(options, data) {
+    var httpImpl = options.protocol === 'http:' ? http : https;
     //console.log(options);
     //console.log(data);
     function executor(resolve, reject) {
-      var req = https.request(options, (res) => {
+      var req = httpImpl.request(options, (res) => {
         //console.log(res.statusCode);
         saveCookies(res.headers['set-cookie'], URL.format(options));
         if (res.statusCode === 301 || res.statusCode === 302 ) {
@@ -84,7 +92,7 @@ function Browser(dummyjar) {
         } else {
           var options = {
               hostname: urlObject.hostname,
-              port: 443,
+              port: urlObject.port,
               protocol: urlObject.protocol,
               path: urlObject.path,
               method: method,

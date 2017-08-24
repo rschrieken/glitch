@@ -43,9 +43,10 @@ function Status(bot) {
         for (u in seenUsers) {
           if (seenUsers.hasOwnProperty(u)) {
             usr = seenUsers[u];
+            console.log(usr);
             if (usr.name && usr.cnt) {
               maxusername = usr.name.length > maxusername ? usr.name.length : maxusername;
-              statList.push( { name: usr.name, cnt: usr.cnt });
+              statList.push( { name: usr.name, cnt: usr.cnt, last_seen: usr.last_seen });
             }
           }
         }
@@ -57,7 +58,10 @@ function Status(bot) {
         statList.sort( function(a, b) {
           return a.cnt < b.cnt ? 1 : a.cnt > b.cnt ? -1 : a.name < b.name ? -1: a.name > b.name ?  1: 0;
         }).forEach(function(stat){
-           msg = msg + (stat.name + padding).substring(0,maxusername) + '  (' +  stat.cnt + ')'  + '\r\n    ';  
+           var ls = new Date(stat.last_seen * 1000);
+           var now = new Date(); 
+           var diff = now.getTime() - ls.getTime();
+           msg = msg + (stat.name + padding).substring(0,maxusername) + ', seen ' + FormatSeconds(diff/1000)  +' ago (' +  stat.cnt + ')'  + '\r\n    ';  
         });
         
         bot.send(msg);

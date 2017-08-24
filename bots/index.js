@@ -3,6 +3,10 @@ const glob = require( 'glob' ),
       EventEmitter = require('events'),
       poster = require('./poster.js');
 
+const Entities = require('html-entities').AllHtmlEntities;
+ 
+const entities = new Entities();
+
 class CommandEmitter extends EventEmitter {}
 
 const cmdEmitter = new CommandEmitter();
@@ -25,7 +29,7 @@ function handleEvent(ce) {
       commandExecuted = ownerCommand.next(ce);
   }
   length = commandInstances.length;
-  cmd = cmdRegex.exec(ce.content);
+  cmd = cmdRegex.exec(entities.decode(ce.content));
   for (i = 0; i < length && !commandExecuted; i = i + 1) {
     state = commandInstances[i];
     if ((state.events !== undefined && (state.events.indexOf(ce.event_type) > -1)) &&

@@ -8,7 +8,7 @@ function Blame(bot) {
   }
   
   function pingUser(username) {
-    return username !== undefined ? '@' + username.replace(' ',''): 'nobody'
+    return username !== undefined ? '@' + username.replace(/\s/g,''): 'nobody'
   }
   
   return {

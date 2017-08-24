@@ -23,7 +23,7 @@ app.set('view engine', 'pug') // register the template engine
 
 app.use(bodyParser.urlencoded(
   { extended: false, 
-   limit: 100 }));
+   limit: 200 }));
 
 app.use(cookieParser(process.env.COOKIESECRET));
 
@@ -96,21 +96,27 @@ app.get("/test", function (request, response) {
 var buf;
 
 app.post("/start", function (request, response) {
+  console.log('start');
   if (se.isInitialized()) {
     response.redirect('/');
   } else {
+    console.log('start try login');
     if (se.isLoginValid(request.body)) {
+      console.log('start login can proceed');
       se.login(request.body.user, request.body.pwd, request.body.roomId, request.body.server).
       then(msg => {
+        console.log('start login OK');
         buf = crypto.randomBytes(256);
         response.cookie('frontendowner', buf.toString('base64'), {signed: true});
         response.render('start', { title: 'Bot Control', status: msg, frontendowner:true });
       }).
       catch(msg => {
+        console.log('start login failed');
         response.render('index', {title: 'Bot Control', error: msg});
       });
 
     } else {
+      console.log('start form invalid');
       response.render('index', {title: 'Bot Control', error: 'Invalid input'});
     }
   }
@@ -142,6 +148,7 @@ app.get("/stop", function (request, response){
   }
 });
 
+/*
 if (process.env.SEUSER && process.env.SEPWD && process.env.ROOMID && process.env.DEFAULTSERVER) {
   console.log('user, pwd and room set');
   se.login(process.env.SEUSER, process.env.SEPWD, process.env.ROOMID, process.env.DEFAULTSERVER).
@@ -150,6 +157,7 @@ if (process.env.SEUSER && process.env.SEPWD && process.env.ROOMID && process.env
        console.log('auto start', msg);
   }).catch((err) =>{ console.log(err) });
 }
+*/
 
 // listen for requests :)
 var listener;
@@ -167,12 +175,23 @@ if (process.env.SSL ==='OFFLOADED') {
   } );
 }
 
+// TESTING
+se.autologin(process.env.DEFAULTSERVER, process.env.ROOMID, process.env.SEUSER, process.env.SEPWD)
+  .then((result) => { 
+    if(typeof result === "object" && result.needlogin === true) {
+       console.log('need login', result);
+    } else {  
+      buf = crypto.randomBytes(256)
+    }
+  })
+  .catch((err) => { console.error(err); });
+
 const wss = new WebSocket.Server({ server:listener });
 
 wss.on('connection', function connection(ws) {
  
   ws.on('message', function incoming(message) {
-    console.log('received: %s', message);
+    //console.log('received: %s', message);
   });
 
   const action = (a) => {
@@ -184,7 +203,7 @@ wss.on('connection', function connection(ws) {
   se.statusEvents().on('action', action);
   
   const status = (a) => {
-    console.log('status %o', a);
+    //console.log('status %o', a);
     if (ws.readyState === 1) {
       ws.send(JSON.stringify({event: 'status', payload: a}));
     }
@@ -192,7 +211,7 @@ wss.on('connection', function connection(ws) {
   se.statusEvents().on('status', status);
   
   const tick = (a) => {
-    console.log('tick %s', a);
+    //console.log('tick %s', a);
     if (ws.readyState === 1) {
       ws.send(JSON.stringify({event: 'tick', payload: a}));
     }

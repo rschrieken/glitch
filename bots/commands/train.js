@@ -15,7 +15,7 @@ function TrainState(bot) {
         } else {
           lastcnt = lastcnt + 1;
           if (lastcnt === 3) {
-            decoded = entities.decode(decodeURIComponent(last));
+            decoded = entities.decode(last);
             bot.send(decoded);
           }
        }
