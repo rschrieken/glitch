@@ -71,7 +71,7 @@ describe('Chatroom', () => {
     room.seenUsers[42] = {id:42, displayName:"fubar"};
     var actual = room.postInfo([42], []);
     actual.then( () => {
-      assert.equal(room.seenUsers[42].displayName,'fubar');
+      assert.equal(room.seenUsers[42].displayName,'barfu');
       done();
     }).catch((e) => { console.log(e); done('failed') });
   });
