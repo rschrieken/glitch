@@ -39,8 +39,16 @@ function SocketHandler(roomInstance) {
     var userids = [], forceIds = [];
 
     function addUnique(arr, key) {
-      if (key && arr.indexOf(key) === -1){
-          arr.push(key);
+      var found =false;
+      if (key){
+        arr.forEach(function(item){
+          if (!found && item.user_id === key.userid) {
+            found = true;
+            return false;
+          }
+        });
+      
+        if (found) arr.push(key);
       }
     }
 
@@ -58,10 +66,10 @@ function SocketHandler(roomInstance) {
           case EventType.MessagePosted:
           case EventType.MessageEdited:
           case EventType.UserEntered:
-            add(event.user_id);
+            add({user_id: event.user_id, last_seen: event.time_stamp});
             break;
           case EventType.UserNameOrAvatarChanged:
-            addForced(event.target_user_id);
+            addForced({user_id: event.user_id, last_seen: event.time_stamp});
             break;
           default:
             break;

@@ -76,11 +76,21 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     this.emit('action', 'info');
     
     function cleanUserIds(userIds) {
-      var clean = forcedIds || [];
+      var clean = [];
+      (forcedIds || []).forEach( function(user) {
+          clean.push(user.user_id);
+          var currentUser = self.seenUsers[user.user_id]; 
+          if (currentUser !== undefined) {
+            currentUser.last_seen = user.last_seen;  
+          }
+      });
       userIds.forEach(function(user){
-        if (self.seenUsers[user] === undefined) {
-          clean.push(user);
-        } 
+        var currentUser = self.seenUsers[user.user_id]; 
+        if (currentUser === undefined) {
+          clean.push(user.user_id);
+        } else {
+          currentUser.last_seen = user.last_seen;
+        }
       });
 
       return clean;
