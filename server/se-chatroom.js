@@ -214,8 +214,16 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
         var userids = [];
           if (events) {
             events.forEach(function(event){
-              if (event.user_id && userids.indexOf(event.user_id) === -1){
-                userids.push(event.user_id);
+              var found = false;
+              if (event.user_id) {
+                userids.forEach(function(user){
+                  if (user.user_id === event.user_id && !found) {
+                      found = true;      
+                  }
+                });
+                if (found){
+                   userids.push({user_id: event.user_id});  
+                }
               }
             });
           }
