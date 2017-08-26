@@ -48,7 +48,7 @@ function SocketHandler(roomInstance) {
           }
         });
       
-        if (found) arr.push(key);
+        if (found === false) arr.push(key);
       }
     }
 

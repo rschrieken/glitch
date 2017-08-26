@@ -221,7 +221,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
                       found = true;      
                   }
                 });
-                if (found){
+                if (found === false){
                    userids.push({user_id: event.user_id});  
                 }
               }
