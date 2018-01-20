@@ -1,4 +1,5 @@
 const util = require('../util.js');
+const parser = require('../../utils/htmlparser.js');
 
 function Blame(bot) {
   var silent = false, ttw;
@@ -22,7 +23,9 @@ function Blame(bot) {
         for (u in seenUsers) {
           if (seenUsers.hasOwnProperty(u)) {
             usr = seenUsers[u];
-            if (usr.name && usr.cnt) {
+            if (usr.name && 
+                usr.cnt && 
+                usr.is_moderator === false) {
               userlist.push( { name: usr.name });
             }
           }
@@ -36,11 +39,11 @@ function Blame(bot) {
             ' blames ' + 
             pingUser(usr.name) + 
             ' for ' + 
-            ((arg === undefined || (typeof arg === 'string' && arg.length ===0)) ? 'everything': arg));
+            ((arg === undefined || (typeof arg === 'string' && arg.length ===0)) ? 'everything': parser.cleanInput(arg)));
           nextTime = new Date();
-          nextTime.setMinutes(nextTime.getMinutes() + 6);
+          nextTime.setMinutes(nextTime.getMinutes() + 1);
           ttw = nextTime;
-          setTimeout(function () { silent = false; ttw = undefined }, util.minutes(6));
+          setTimeout(function () { silent = false; ttw = undefined }, util.minutes(1));
           silent = true;
         }
       }
