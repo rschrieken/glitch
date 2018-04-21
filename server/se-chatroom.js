@@ -63,7 +63,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           self.status.msg = 'message posted';
           self.emit('status', self.status);
           resolve(self.status) 
-      });  
+      }).catch(reject);  
     }
     return new Promise(executor);
   }

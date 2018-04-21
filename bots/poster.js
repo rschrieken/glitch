@@ -41,7 +41,7 @@ function MessagePoster(room, prepend) {
                   throttle = util.seconds(2);
               }
           }
-        });
+        }).catch(()=>{ console.warn('error'); throttle = util.seconds(30); stop(); init();});
       } catch(e) {
         console.log(e);
       }
@@ -116,7 +116,7 @@ function MessagePoster(room, prepend) {
         } else {
             console.log('throtled:' + ownmsg[ownmsg.length - 1].toString());
         }
-    }, util.seconds(2));
+    }, throttle);
   }
   
   init();

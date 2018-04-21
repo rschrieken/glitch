@@ -1,0 +1,130 @@
+const util = require('../util.js');
+const http = require('http');
+const htmlparser = require('htmlparser2');
+
+function WordParser(res) {
+  var state = 0, words =[];
+
+  function executor(resolve, reject) {
+    var parser = new htmlparser.Parser(
+       {
+         onopentag: function(tagname, attr) {
+           //console.log(tagname, attr, state);
+           if (state === 0 && tagname === 'table' && 
+               attr.summary && attr.summary.indexOf('links to') === 0)  {        
+             state++;
+           }
+           if (state === 1 && 
+               tagname === 'a' && 
+               attr.class &&
+               attr.class === 'stats') {
+             state++;
+             
+           }             
+         },
+         ontext: function(text) {
+           if (state === 2) {
+             if (words.indexOf(text) === -1 ) {
+               words.push(text);
+             }
+           }
+         },
+         onclosetag: function(tagname) {
+           if (tagname === 'table') {
+             state = 0;
+           }
+           if (tagname === 'a' && state > 1) {
+             state--;
+           }
+         }
+       },{ decodeEntities: true }
+    );
+    res.on('data', (d) => {
+       parser.write(d);
+    });
+    res.on('error', (error) => {
+      console.log(error);
+      reject(error);
+    });
+    res.on('end', (d) => {
+      parser.end();
+      resolve(words);
+    });
+  }
+  return new Promise(executor);   
+}
+
+/* last message tracker */
+function Wag(bot, logger) {
+  var listener,
+      url='http://www.wordassociation.org/words',
+      log = logger || console;
+  
+  function fetchWag(word, cb) {
+    http.get(url + '/' + word , (res) => {
+      res.setEncoding('utf8');
+      new WordParser(res).then((words)=>{ cb(words);  }).catch(()=>{logger.error('wag parse err')});
+    }).on('error', (e) => {
+      log.error(`Got error: ${e.message}`);
+    });
+  }
+  
+  function sendWord(word, message_id) {
+    if (!allowed) return;
+    function getRandomInt(max) {
+      return Math.floor(Math.random() * Math.floor(max));
+    }
+    
+    fetchWag(word, function(data) {
+      
+       if (data && data.length > 0) {
+         var ok = [];
+         for(var i=0; i<data.length; i++) {
+           var idx = lastwords.indexOf(data[i]);
+           if (idx === -1) {
+             ok.push(data[i]);
+           }
+         }
+         var nxtwrd = ok[getRandomInt(ok.length)];
+         bot.send(':' + message_id + ' ' + nxtwrd);
+         lastwords.push(nxtwrd);
+         if (lastwords.length > 100) {
+           lastwords.shift();
+         }
+       } else {
+         log.info('no data for ${word}');
+       }
+    });
+    
+  }
+  
+  var allowed = true;
+  var lastwords = [];
+  
+  function stateHandler(ce) {
+    var cnt = ce.content.trim();
+    const regex = /^@\S+\s(\w+)$/g;
+    var m = regex.exec(cnt);
+    if (m && m.length > 1) {
+        if (ce.event_type === 1) {
+          lastwords.push(m[1]);
+        } else {
+          if (ce.user_id !== 269324) {
+            sendWord(m[1], ce.message_id);
+          }
+        }
+    }
+  }
+  
+  function setAllowed() {
+    allowed = false;
+    setTimeout(() => { allowed = true; }, 10000);
+  }
+
+  return {
+    events: [1, 8, 18],
+    next: stateHandler
+  };
+}
+
+module.exports = Wag

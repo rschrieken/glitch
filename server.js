@@ -83,7 +83,6 @@ app.get("/test", function (request, response) {
       html+= 'no file';
       console.log(err);
     } else {
-      console.log(data);
       html+= data;
     }
     response.send(html+'</body></html>');

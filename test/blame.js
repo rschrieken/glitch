@@ -20,7 +20,7 @@ describe('Bot commands', function() {
   describe('blame a user', function() {
     it('sends blame to user', function(done) {
       var bot = {
-        seenUsers: function() { return {42: {name: 'foo', cnt:1}} },
+        seenUsers: function() { return {42: {name: 'foo', cnt:1, is_moderator:false}}},
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
           done() }
@@ -34,7 +34,7 @@ describe('Bot commands', function() {
   describe('blame a user', function() {
     it('sends blame to user with a reason', function(done) {
       var bot = {
-        seenUsers: function() { return {42: {name: 'foo', cnt:1}} },
+        seenUsers: function() { return {42: {name: 'foo', cnt:1, is_moderator:false}} },
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
           assert.ok(m.indexOf('for fubar') > 0); 
@@ -49,7 +49,7 @@ describe('Bot commands', function() {
   describe('blame a user', function() {
     it('sends blame to user with a ping', function(done) {
       var bot = {
-        seenUsers: function() { return {42: {name: 'foo', cnt:1}} },
+        seenUsers: function() { return {42: {name: 'foo', cnt:1, is_moderator:false}} },
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
           assert.ok(m.indexOf('for @fubar') > 0); 
@@ -64,7 +64,7 @@ describe('Bot commands', function() {
   describe('blame a user', function() {
     it('sends blame to user with space in name with a ping', function(done) {
       var bot = {
-        seenUsers: function() { return {42: {name: 'fu bar', cnt:1}} },
+        seenUsers: function() { return {42: {name: 'fu bar', cnt:1, is_moderator:false}} },
         send: function(m) { 
           assert.ok(m.indexOf('@fubar') > 0); 
           done() }
