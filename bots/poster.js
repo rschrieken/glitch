@@ -35,13 +35,15 @@ function MessagePoster(room, prepend) {
     } else {
       try {
         
-        room.postMessage(txt).then(() => {if (throttle > util.seconds(2)) {
+        room.postMessage(txt).then(() => {
+          if (throttle > util.seconds(2)) {
               throttle = throttle - Math.round(throttle / 4);
               if (throttle < util.seconds(2)) {
                   throttle = util.seconds(2);
               }
+              init();
           }
-        }).catch(()=>{ console.warn('error'); throttle = util.seconds(30); stop(); init();});
+        }).catch((e)=>{ console.warn('realsend error', e); ownMessageReceived(); init();});
       } catch(e) {
         console.log(e);
       }
@@ -106,6 +108,8 @@ function MessagePoster(room, prepend) {
   }
   
   function init() {
+    if (interval) stop();
+    
     interval = setInterval(function () {
         var txt;
         if (isCurrentRateFine(ownmsg)) {
