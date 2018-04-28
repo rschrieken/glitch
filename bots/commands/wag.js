@@ -103,7 +103,7 @@ function Wag(bot, logger) {
   
   function stateHandler(ce) {
     var cnt = ce.content.trim();
-    const regex = /^@\S+\s(\w+)$/g;
+    const regex = /^@\S+\s(\w+)(\s<a href="http.+">\(\?\)<\/a>){0,1}$/g;
     var m = regex.exec(cnt);
     if (m && m.length > 1) {
         if (ce.event_type === 1) {
@@ -113,6 +113,8 @@ function Wag(bot, logger) {
             sendWord(m[1], ce.message_id);
           }
         }
+    } else {
+      log.info('not regexed',ce.content);
     }
   }
   

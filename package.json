@@ -12,19 +12,19 @@
     "test": "mocha --reporter doc"
   },
   "dependencies": {
-    "express": "^4.15.3",
-    "pug": "2.0.0-rc.2",
-    "body-parser": "^1.17.2",
+    "express": "^4.16.3",
+    "pug": "^2.0.3",
+    "body-parser": "^1.18.2",
     "htmlparser2": "^3.9.2",
-    "tough-cookie": "^2.3.2",
-    "ws": "^3.0.0",
+    "tough-cookie": "^2.3.4",
+    "ws": "^5.1.1",
     "glob": "^7.1.2",
-    "mocha": "^3.4.2",
+    "mocha": "^5.1.1",
     "cookie-parser": "^1.4.3",
     "cookie": "^0.3.1",
     "log": "^1.4.0",
     "html-entities": "^1.2.1",
-    "xml2js": "^0.4.17",
+    "xml2js": "^0.4.19",
     "file-cookie-store": "^0.2.1"
   },
   "engines": {

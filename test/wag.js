@@ -19,5 +19,17 @@ describe('Wag', () => {
       wag.next({content:'@usr hello', event_type:18});
       
     });
+    
+    it('accepts Fox 9000 data', (done) => {
+      var bot = {
+        send: (t) => { console.log(t); done();},
+        error: (e) => {done(false)},
+        info: (e) => {console.log(e); done(false);}
+      };
+      
+      var wag = new Wag(bot, bot);
+      wag.next({content:'@usr hello <a href="https://example.org">(?)</a>', event_type:18});
+      
+    });
   });
 });
