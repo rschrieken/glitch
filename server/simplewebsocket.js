@@ -124,7 +124,7 @@ function SocketHandler(roomInstance) {
   }
   
   function error(e) {
-    console.log('ws error for %s: %s', roomId, e)
+    console.log('ws error for %s:', roomId, e)
   }
   
   function close() {
@@ -171,12 +171,12 @@ function StartWebSocketListener(url, origin, sh)
     ws.on('ping', () =>{ console.log('ws ping') });
     
     setTimeout(()=>{
-      ws.ping('',true,true);
+      ws.ping('',true,(err)=> {console.error(err);});
       console.log('ping send ...');
     }, 15000)
   
     function reconnect() {
-      if (reconnecting) {
+      if (reconnecting === true) {
         console.warn('a pevious reconnect is still going');
       } else {
         reconnecting = true;
@@ -200,7 +200,7 @@ function StartWebSocketListener(url, origin, sh)
     timer = setInterval(()=>{
       if (alive > 0) {
         console.warn('websocket not alive for %d seconds', alive * EXPECT_HEARTBEAT_SECONDS );
-        ws.ping('',false,true);
+        ws.ping('',false,(err) => {console.error(err);});
       }
       if (alive === 3) {
         console.error('ws not alive');
@@ -210,6 +210,7 @@ function StartWebSocketListener(url, origin, sh)
         ws.removeEventListener('error', sh.error);
         ws.removeEventListener('open', sh.open);
         ws.removeEventListener('close', sh.close);
+        ws.terminate();
         // re-init
         console.log('ws re-init');
         reconnect();

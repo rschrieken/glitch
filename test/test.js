@@ -2,6 +2,10 @@ var assert = require('assert');
 var describe = require('mocha').describe;
 var it = require('mocha').it;
 var beforeEach = require('mocha').beforeEach;
+var after = require('mocha').after;
+var before = require('mocha').before;
+
+const WebSocket = require('ws');
 
 describe('Array', function() {
   describe('#indexOf()', function() {
@@ -205,6 +209,11 @@ describe('Poster', () => {
 });
 
 describe('Stack Exchange login', () => {
+  var wss 
+  before(()=> {
+    wss = new WebSocket.Server({ port:0 });
+    //console.error('sel wss options', wss);
+  });
   var browser = {
     Browser: function() {
       return {
@@ -222,18 +231,35 @@ describe('Stack Exchange login', () => {
           return new Promise(exec);
         },
         postform: function(url, data) {
+          var dataToEmit = '<input name="fkey" value="4242" />';
+          if (url.indexOf('/events') > 0) {
+            dataToEmit = '{"events":[]}';
+          }
+          if (url.indexOf('/new') > 0) {
+            dataToEmit = '{"events":[]}';
+          }
+          if (url.indexOf('/ws-auth') > 0) {
+            dataToEmit = '{"url":"ws://localhost:' + wss.address().port + '/"}';
+          }
+          console.log('pf', url,data);
           return new Promise((res,rej)=> {
             var ms = new require('stream').Readable();
             ms._read = function(size) { /* do nothing */ };
             setTimeout(()=> {
-              ms.emit('data', '<input name="fkey" value="42" />');
+              ms.emit('data', dataToEmit);
               ms.emit('end');
             },1);
             res(ms);});
         }
       }
     }};
+  
   var login = require('../server/se-login.js')( browser);
+  
+  after( function() {
+    login.stop();
+  });
+  
   it('is not isInitialized ', function() {
     assert.equal(login.isInitialized(),false)
   });
@@ -253,7 +279,7 @@ describe('Stack Exchange login', () => {
   it('login u/p', function(done) {
     var expected = true;
     var actual = login.login('a','b','42','1');
-    actual.then(done());
+    actual.then(done()).catch(()=> {done(false)});
   });
   
 });
@@ -277,7 +303,7 @@ describe('Util', () => {
   });
   
   describe('seconds ', () => {
-    it('returns 1000 ms for each second', () => {
+    it('returns 2000 ms for each second', () => {
       var time = util.seconds(2);
       assert.equal(2000,time);
     });

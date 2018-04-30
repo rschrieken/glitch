@@ -12,7 +12,7 @@ describe('Wag', () => {
       var bot = {
         send: (t) => { console.log(t); done();},
         error: (e) => {done(false)},
-        info: (e) => {console.log(e);}
+        info: (e) => {console.log(e);done();}
       };
       
       var wag = new Wag(bot, bot);
@@ -22,9 +22,9 @@ describe('Wag', () => {
     
     it('accepts Fox 9000 data', (done) => {
       var bot = {
-        send: (t) => { console.log(t); done();},
-        error: (e) => {done(false)},
-        info: (e) => {console.log(e); done(false);}
+        send: (t) => { console.log('send', t); done();},
+        error: (e) => {console.error('err', e);done(false)},
+        info: (e) => {console.log('info',e); done(false);}
       };
       
       var wag = new Wag(bot, bot);

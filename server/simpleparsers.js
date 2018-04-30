@@ -253,7 +253,15 @@ function ResponseParser(type, response) {
       });
       res.on('end', (d) => {
         jsonstring += decoder.end(d);
-        resolve(JSON.parse(jsonstring));
+        var  obj;
+        try {
+          obj =  JSON.parse(jsonstring)
+        } catch(er)
+        {
+          console.log('no json? ',jsonstring);
+          reject(new Error('no json recvd'));
+        }
+        resolve(obj);
       });
     }
     return new Promise(executor);

@@ -193,6 +193,10 @@ wss.on('connection', function connection(ws) {
     //console.log('received: %s', message);
   });
 
+  ws.on('ping', function incoming(message) {
+    //console.log('received: %s', message);
+  });
+
   const action = (a) => {
     console.log('action %s', a);
     if (ws.readyState === 1) {

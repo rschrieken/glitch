@@ -7,9 +7,9 @@
   "description": "KennyBOT is a nodejs chatbot for the SE network",
   "main": "server.js",
   "scripts": {
-    "prestart": "mocha --reporter doc > views/test.html",
-    "start": "(mocha --reporter doc > views/test.html  || true) && node server.js",
-    "test": "mocha --reporter doc"
+    "prestart": "mocha --exit --reporter doc > views/test.html",
+    "start": "(mocha --exit --reporter doc > views/test.html  || true) && node server.js",
+    "test": "mocha --exit --reporter doc"
   },
   "dependencies": {
     "express": "^4.16.3",
