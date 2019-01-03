@@ -5,8 +5,8 @@ const glob = require( 'glob' ),
       poster = require('./poster.js');
 
 const Entities = require('html-entities').AllHtmlEntities;
- 
-const db = new Datastore({ filename: './data/seenusers.db', autoload: true });
+
+const db = new Datastore({ filename: './.data/seenusers.db', autoload: true });
 
 const entities = new Entities();
 
