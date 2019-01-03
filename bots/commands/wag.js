@@ -85,11 +85,15 @@ function Wag(bot, logger) {
              ok.push(data[i]);
            }
          }
-         var nxtwrd = ok[getRandomInt(ok.length)];
-         bot.send(':' + message_id + ' ' + nxtwrd);
-         lastwords.push(nxtwrd);
-         if (lastwords.length > 100) {
-           lastwords.shift();
+         if (ok.length > 0) {
+           var nxtwrd = ok[getRandomInt(ok.length)];
+           bot.send(':' + message_id + ' ' + nxtwrd);
+           lastwords.push(nxtwrd);
+           if (lastwords.length > 100) {
+             lastwords.shift();
+           }
+         } else {
+           bot.send(':' + message_id + ' out of words ...');
          }
        } else {
          log.info('no data for ${word}');

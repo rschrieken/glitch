@@ -1,10 +1,13 @@
 const glob = require( 'glob' ),
       path = require( 'path' ),
+      Datastore= require( 'nedb' ),
       EventEmitter = require('events'),
       poster = require('./poster.js');
 
 const Entities = require('html-entities').AllHtmlEntities;
  
+const db = new Datastore({ filename: './data/seenusers.db', autoload: true });
+
 const entities = new Entities();
 
 class CommandEmitter extends EventEmitter {}
@@ -54,6 +57,15 @@ function handleEvent(ce) {
 }
 
 
+function allSeenUsers() {
+  return new Promise(function(resolve, reject) {
+    db.find({}, function(err, docs) {
+      if (err) resolve([]); 
+      else resolve(docs);
+    });
+  });
+}
+
 function handleSeenUser(userid) {
   var cnt = 1;
   var fu = room.seenUsers[userid];
@@ -63,6 +75,20 @@ function handleSeenUser(userid) {
     room.seenUsers[userid] = {};
   }
   room.seenUsers[userid].cnt = cnt;
+  
+  db.find({userid: userid}, function(err, docs) {
+    if (err) console.error(err);
+    
+    
+    if (docs.length === 0) {
+      db.insert({userid: userid, name: (room.seenUsers[userid].name || ''),  cnt: cnt, totalcnt:1, "last_seen": Date.now() });
+    } else {
+      console.log('hsu update ',docs);
+      db.update({_id: docs[0]._id}, { $inc: { totalcnt: 1 }, $set: { name: room.seenUsers[userid].name, "last_seen": Date.now() , cnt: cnt } }, {upsert:false});
+    }
+  });
+  
+  
 }
 
 function handleBotOwner(uid) {
@@ -132,6 +158,7 @@ function init(roomInstance) {
     silence: messagePoster.silent,
     started: started,
     seenUsers: function () {return roomInstance.seenUsers },
+    allSeenUsers: allSeenUsers,
     states: statesAccessor,
     oncmd: cmdEmitter,
     getHostname: roomInstance.getHostname

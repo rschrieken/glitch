@@ -127,7 +127,7 @@ function login (user, pwd, roomId, server) {
   loginurl = serverbase.replace('chat.','') + process.env.LOGINPATH;
   
   function executor(resolve,reject) {
-    // universal auth is not that universal
+    // universal login is not that universal
     function loginse(url, form) {
       webbrowser.postform(url, form).then((res) =>{
         var resp2 = new ResponseParser('form',res);

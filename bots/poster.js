@@ -107,6 +107,23 @@ function MessagePoster(room, prepend) {
       clearInterval(interval);
   }
   
+  var throttleFallback; 
+  
+  function startThrottleFallback() {
+    if (throttleFallback) {
+      console.log('already waiting for throttle');
+    } else {
+      throttleFallback = setTimeout(ownMessageReceived, 2 * 60 * 1000); // 2 minutes
+    }
+  }
+  
+  function stopThrottleFallback() {
+    if (throttleFallback) {
+      console.log('clearing throttle fallback');
+      clearTimeout(throttleFallback);
+    }
+  }
+  
   function init() {
     if (interval) stop();
     
@@ -115,10 +132,12 @@ function MessagePoster(room, prepend) {
         if (isCurrentRateFine(ownmsg)) {
             txt = msg.shift();
             if (txt !== undefined) {
+                stopThrottleFallback();
                 realsend(txt);
             }
         } else {
             console.log('throtled:' + ownmsg[ownmsg.length - 1].toString());
+            startThrottleFallback();
         }
     }, throttle);
   }

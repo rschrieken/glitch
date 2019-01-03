@@ -4,8 +4,7 @@ const util = require('../util.js');
 function Poo(bot) {
   var cmd = '!!poo', num = 1;
 
-  bot.oncmd.on('wipe', (arg)=>{
-    console.log(arg);
+  bot.oncmd.on('wipe', function(arg){
     if (arg.state > 1) {
       num = 1;
     }

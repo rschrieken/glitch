@@ -80,17 +80,22 @@ function SocketHandler(roomInstance) {
     return {userIds:userids, forceIds:forceIds};
   }
     
+  function isEmpty(obj) {
+    return Object.keys(obj).length === 0 && obj.constructor === Object
+  }
+  
   function message(m) {
     if (Buffer.isBuffer(m.data)) {
       console.log('pong recv:', m.data.length);
       return;
     }
-    console.log('message: ', m.data);
+    // if (m.data && m.data !== {}) console.log('message: ', m.data);
     roomInstance.emit('tick', Date.now());
     var room = JSON.parse(m.data)['r'+roomId];
     if (room) {
       roomInstance.status.lastPing = Date.now();
       roomInstance.status.cntPing++;
+      if (!isEmpty(room)) console.log('message: ', m.data);
       if (room.e) {
         var ids = getUniqueUserids(room.e);
         roomInstance.postInfo(ids.userIds, ids.forceIds);       

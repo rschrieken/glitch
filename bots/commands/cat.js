@@ -1,6 +1,8 @@
 const util = require('../util.js');
-const http = require('http');
+const http = require('https');
 const parseString = require('xml2js').parseString;
+
+const baseUrl = 'https://api.thecatapi.com/api';
 
 /* post a cat gif */
 function Cat(bot) {
@@ -34,7 +36,7 @@ function Cat(bot) {
     }
     
     function getCategories() {
-      var url = 'http://thecatapi.com/api/categories/list';
+      var url = baseUrl+ '/categories/list';
       if (categoriePromise === undefined) {
         categoriePromise = new Promise((resolve, reject) => {
           http.get(url, (res)=> {
@@ -58,9 +60,9 @@ function Cat(bot) {
                 } else {
                   console.log('category rawdata', rawData);
                   console.log('category result', result);
-                  console.log('category result.response', result.response);
-                  console.log('category result.response.data', result.response.data);
-                  console.log('category result.response.data.categories', result.response.data[0].categories);
+                  if (result) console.log('category result.response', result.response);
+                  if (result && result.response) console.log('category result.response.data', result.response.data);
+                  if (result && result.response && result.response.data && result.response.data.length > 0) console.log('category result.response.data.categories', result.response.data[0].categories);
                   console.log(categorieList);
                 }
                 resolve(categories);
@@ -80,7 +82,7 @@ function Cat(bot) {
           cb('I only know these categories: ' + catlist.join(', '));
           cat = undefined;
         }
-        var fetchUrl = "http://thecatapi.com/api/images/get?format=XML&results_per_page=1" + (cat?"&category="+cat:"")
+        var fetchUrl = baseUrl + '/images/get?format=XML&results_per_page=1'  + (cat?"&category="+cat:"")
         console.log(fetchUrl);
         http.get(fetchUrl , (res) => {
           res.setEncoding('utf8');
@@ -88,6 +90,7 @@ function Cat(bot) {
           res.on('data', (chunk) => { rawData += chunk; });
           res.on('end', () => {
             try {
+              console.log(rawData);
                 parseString(rawData, function (err, result) {
                   if (err) {
                     console.log(err);

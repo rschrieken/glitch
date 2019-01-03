@@ -198,7 +198,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
         
         browser.postform(urls.leave,
           {
-            quiet: true,
+            quiet: true, 
             fkey: fkey
           }).
           then( resolve);
