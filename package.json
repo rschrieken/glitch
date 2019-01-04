@@ -8,7 +8,7 @@
   "main": "server.js",
   "scripts": {
     "prestart": "mocha --exit --reporter doc > views/test.html",
-    "start": "(mocha --exit --reporter doc > views/test.html  || true) && node server.js",
+    "start": "node server.js",
     "test": "mocha --exit --reporter doc"
   },
   "dependencies": {

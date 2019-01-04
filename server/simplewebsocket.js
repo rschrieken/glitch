@@ -42,7 +42,7 @@ function SocketHandler(roomInstance) {
       var found =false;
       if (key){
         arr.forEach(function(item){
-          if (!found && item.user_id === key.userid) {
+          if (!found && item.user_id === key.user_id) {
             found = true;
             return false;
           }
@@ -68,6 +68,7 @@ function SocketHandler(roomInstance) {
           case EventType.UserEntered:
             add({user_id: event.user_id, last_seen: event.time_stamp});
             break;
+          case EventType.UserLeft:
           case EventType.UserNameOrAvatarChanged:
             addForced({user_id: event.user_id, last_seen: event.time_stamp});
             break;

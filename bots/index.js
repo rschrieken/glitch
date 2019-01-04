@@ -8,6 +8,40 @@ const Entities = require('html-entities').AllHtmlEntities;
 
 const db = new Datastore({ filename: './.data/seenusers.db', autoload: true });
 
+// make unique
+db.find({}, function(err,docs) {
+  if (err) {
+    console.error(err);
+  } else {
+    var u = {};
+    var d = {};
+    docs.forEach(function(item) {
+      if (u[item.userid] === undefined) {
+        u[item.userid] = {cnt : 0};
+      } else {
+        if (d[item.userid] === undefined) {
+          d[item.userid] ={keys:[]};
+        }
+        d[item.userid].keys.push(item._id);
+      }
+    });
+    console.log('foxop uniqiues', u);
+    console.log('dupes', d);
+    
+    for(var p in d) {
+      if (d.hasOwnProperty(p)) {
+        var del = d[p];
+        while(del.keys.length>0) {
+          db.remove({_id: del.keys.shift() });
+          //console.log(del.keys.shift());
+        }
+      }
+    }
+    db.ensureIndex({ fieldName: 'userid', unique: true }, function (err) { console.error(err); });
+    
+  }
+});
+
 const entities = new Entities();
 
 class CommandEmitter extends EventEmitter {}
@@ -69,26 +103,54 @@ function allSeenUsers() {
 function handleSeenUser(userid) {
   var cnt = 1;
   var fu = room.seenUsers[userid];
-  if (fu !== undefined) {
-     cnt = fu.cnt + 1;
-  } else {
-    room.seenUsers[userid] = {};
-  }
+  if (fu === undefined) return;
+  cnt = fu.cnt + 1;
   room.seenUsers[userid].cnt = cnt;
+  
+  function insertUser() {
+    db.insert({
+        userid: userid, 
+        name: (room.seenUsers[userid].name || userid.toString()),  
+        cnt: cnt, 
+        totalcnt: 1, 
+        "last_seen": Date.now() }
+    , function(err) {
+        if (err) { 
+          console.error(err);
+          if (err.errorType === 'uniqueViolated') {
+            updateOneUser({userid : userid});
+          }
+        }
+      }
+    );
+  }
+  
+  function updateOneUser(query) {
+      db.update(query, { 
+        $inc: { totalcnt: 1 }, 
+        $set: { name: room.seenUsers[userid].name, 
+               "last_seen": Date.now() , 
+               cnt: cnt } 
+      }, 
+      {upsert:false});
+  }
+  
+  function updateUser(docs) {
+      console.log('hsu update ',docs);
+      updateOneUser({
+        _id: docs[0]._id
+      });
+  }
   
   db.find({userid: userid}, function(err, docs) {
     if (err) console.error(err);
     
-    
     if (docs.length === 0) {
-      db.insert({userid: userid, name: (room.seenUsers[userid].name || ''),  cnt: cnt, totalcnt:1, "last_seen": Date.now() });
+      insertUser();
     } else {
-      console.log('hsu update ',docs);
-      db.update({_id: docs[0]._id}, { $inc: { totalcnt: 1 }, $set: { name: room.seenUsers[userid].name, "last_seen": Date.now() , cnt: cnt } }, {upsert:false});
+      updateUser(docs);
     }
   });
-  
-  
 }
 
 function handleBotOwner(uid) {
