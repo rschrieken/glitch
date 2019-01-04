@@ -75,10 +75,10 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     var self = this;
     this.emit('action', 'info');
     
-    console.log('postInfo 1', userIds, forcedIds);
+    // console.log('postInfo 1', userIds, forcedIds);
     
     function cleanUserIds(userIds) {
-      console.log('pi clean seenUsers', self.seenUsers);
+      // console.log('pi clean seenUsers', self.seenUsers);
       var clean = [];
       (forcedIds || []).forEach( function(user) {
           clean.push(user.user_id);
@@ -88,9 +88,9 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           }
       });
       userIds.forEach(function(user){
-        console.log('pi clean in foreach', user);
+        // console.log('pi clean in foreach', user);
         var currentUser = self.seenUsers[user.user_id]; 
-        console.log('pi clean lookedup', currentUser);
+        // console.log('pi clean lookedup', currentUser);
         if (currentUser === undefined) {
           clean.push(user.user_id);
         } else {
@@ -102,7 +102,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     }
     
     function fillUsersSeenAndRoomMods(usersinfo){
-      console.log('fillUsersSeenAndRoomMods', usersinfo);
+      //console.log('fillUsersSeenAndRoomMods', usersinfo);
       var users = usersinfo.users || [];
       users.forEach(function(user){
         var cnt = 0;

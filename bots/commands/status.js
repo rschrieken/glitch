@@ -40,8 +40,12 @@ function Status(bot) {
         if (seenUsers.hasOwnProperty(u)) {
           usr = seenUsers[u];
           if (usr.name && usr.cnt) {
+            if (usr.blocked !== true) {
             // maxusername = usr.name.length > maxusername ? usr.name.length : maxusername;
-            statList.push( { name: usr.name, cnt: usr.cnt, last_seen: usr.last_seen, totalcnt: usr.totalcnt });
+               statList.push( { name: usr.name, cnt: usr.cnt, last_seen: usr.last_seen, totalcnt: usr.totalcnt });
+            } else {
+              console.log('blocked user: ', usr);
+            }
           }
         }
       }

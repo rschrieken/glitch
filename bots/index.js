@@ -58,6 +58,7 @@ var //commandCollection = [],
     started = Date.now();
     
 function handleEvent(ce) {
+  
   var i, commandExecuted, length, state, cmdRegex = /^(!!\w+)($|\s(.*))/, cmd;
       commandExecuted = false;
   if ((ce.user_id === room.getUserid() || 
@@ -100,6 +101,25 @@ function allSeenUsers() {
   });
 }
 
+function blockUser(userid) {
+  // console.log('blockUser', userid);
+  if (userid) {
+    var num = parseInt(userid,10);
+    if (isNaN(num)) return;
+    db.update({userid: num }, { $set: {blocked: true}}, {upsert:false}, function(err, nr) {
+      console.log(err, nr);});
+  }
+}
+
+function unblockUser(userid) {
+  if (userid) {
+    var num = parseInt(userid,10);
+    if (isNaN(num)) return;
+    db.update({userid: num }, { $set: { blocked: false}}, {upsert:false});
+  }
+}
+
+
 function handleSeenUser(userid) {
   var cnt = 1;
   var fu = room.seenUsers[userid];
@@ -125,10 +145,12 @@ function handleSeenUser(userid) {
     );
   }
   
-  function updateOneUser(query) {
+  function updateOneUser(query, blocked) {
+      var username = room.seenUsers[userid].name ;
+      if (blocked === true) username = 'user' + userid;
       db.update(query, { 
         $inc: { totalcnt: 1 }, 
-        $set: { name: room.seenUsers[userid].name, 
+        $set: { name: username, 
                "last_seen": Date.now() , 
                cnt: cnt } 
       }, 
@@ -139,7 +161,7 @@ function handleSeenUser(userid) {
       console.log('hsu update ',docs);
       updateOneUser({
         _id: docs[0]._id
-      });
+      }, docs[0].blocked);
   }
   
   db.find({userid: userid}, function(err, docs) {
@@ -201,6 +223,7 @@ function initBotCommands(botInterface) {
         var machine = new cmd(botInterface);
         if (machine.isUnknown) unk = machine;
         if (machine.isOwner === true) {
+          machine.extend({ blockUser: blockUser, unblockUser: unblockUser });
           ownerCommand = machine;
         } else {
           commandInstances.push(machine);
