@@ -34,15 +34,15 @@ function Status(bot) {
     return '    BOT running since: ' +  starttime + ' for ' + FormatSeconds(diff/1000) + '\r\n    ';
   }
   
-  function createList2(seenUsers) {
+  function createList2(seenUsers, showUserId) {
     var u, usr, statList = [];
     for (u in seenUsers) {
         if (seenUsers.hasOwnProperty(u)) {
           usr = seenUsers[u];
-          if (usr.name && usr.cnt) {
+          if (usr.name && usr.cnt >= 0) {
             if (usr.blocked !== true) {
-            // maxusername = usr.name.length > maxusername ? usr.name.length : maxusername;
-               statList.push( { name: usr.name, cnt: usr.cnt, last_seen: usr.last_seen, totalcnt: usr.totalcnt });
+               var statsName = usr.name + (showUserId? ' ( ' + usr.userid + ' ) ':'');
+               statList.push( { name: statsName, cnt: usr.cnt, last_seen: usr.last_seen, totalcnt: usr.totalcnt });
             } else {
               console.log('blocked user: ', usr);
             }
@@ -122,11 +122,17 @@ function Status(bot) {
       statussilent = true;
   }
   
-  function statusV2() {
+  function statusV2(args) {
     if (!statussilent) {
      
+      //console.log('statusV2', args);
+      var currentUser = args? bot.seenUsers()[args.user_id] : {};
+     // console.log('c user ', currentUser);
+      var isModOrOwner = (currentUser.is_moderator === true || currentUser.is_owner === true );
+      // console.log('isModOrOwner ', isModOrOwner);
+      
       bot.allSeenUsers().then(function(userlist) {
-        var statList = createList2(userlist);
+        var statList = createList2(userlist, isModOrOwner);
         var maxusername = getMaxUsername(statList);
 
         var padding = spaces(maxusername);

@@ -28,12 +28,14 @@ function Owner(bot) {
       if (ce.content && ce.content.indexOf('!!block') === 0) {
         var args = ce.content.split(' ');
         bot.blockUser(args[1]);
+        bot.send('Okay ...');
         //console.log('own block args', args);
         handled = true;
       }
       if (ce.content && ce.content.indexOf('!!unblock') === 0) {
         var args = ce.content.split(' ');
         bot.unblockUser(args[1]);
+        bot.send('Done ...');
         handled = true;
       }
       return handled;

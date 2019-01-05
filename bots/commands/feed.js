@@ -7,10 +7,11 @@ function Feed(bot) {
       resp = [
         'I bloody hope {0} is edible ...',
         'I\'m not sure I ever had {0} ...',
-        'The taste of {0} is awful but it\'s better than nothing ..',
+        'The taste of {0} is awful but it\'s better than nothing ...',
         'Thanks for the {0}, appreciated!',
         'Didn\'t I have {0} before?',
         'Come on! Make me something better than {0}',
+        'If you consider {0} to be food I might as well grab a Big Mac ...',
         'No Pizza?'
       ], 
       specials = {

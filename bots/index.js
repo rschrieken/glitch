@@ -8,39 +8,51 @@ const Entities = require('html-entities').AllHtmlEntities;
 
 const db = new Datastore({ filename: './.data/seenusers.db', autoload: true });
 
-// make unique
+// make unique and reset state
 db.find({}, function(err,docs) {
   if (err) {
-    console.error(err);
+    console.error('db find', err);
   } else {
-    var u = {};
     var d = {};
     docs.forEach(function(item) {
-      if (u[item.userid] === undefined) {
-        u[item.userid] = {cnt : 0};
-      } else {
+        // collect duplicates
         if (d[item.userid] === undefined) {
           d[item.userid] ={keys:[]};
+        } else {
+           d[item.userid].keys.push(item._id);
         }
-        d[item.userid].keys.push(item._id);
-      }
     });
-    console.log('foxop uniqiues', u);
-    console.log('dupes', d);
     
+    console.log('dupes', d);
+    // remove duplicates
     for(var p in d) {
       if (d.hasOwnProperty(p)) {
         var del = d[p];
         while(del.keys.length>0) {
           db.remove({_id: del.keys.shift() });
-          //console.log(del.keys.shift());
+          // console.log(del.keys.shift());
         }
       }
     }
-    db.ensureIndex({ fieldName: 'userid', unique: true }, function (err) { console.error(err); });
+    // it should not be possible to have duplicates after this
+    db.ensureIndex({ fieldName: 'userid', unique: true }, function (err) { 
+      if (err) console.error('ensureIndex',err); 
+    });
     
   }
 });
+
+db.persistence.setAutocompactionInterval(60*1000);
+// reset session count
+db.update({ cnt: {$gt:0} }, 
+          {$set: { cnt: 0}}, 
+          {upsert:false, multi: true }, 
+          function(err,nr) {
+            if (err) 
+              console.error('reset session cnt',err); 
+            else 
+              console.log('reset state of %d', nr);
+          });
 
 const entities = new Entities();
 
