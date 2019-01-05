@@ -2,7 +2,7 @@ const util = require('../util.js');
 const http = require('https');
 const parseString = require('xml2js').parseString;
 
-const baseUrl = 'https://api.thecatapi.com/api';
+const baseUrl = 'https://api.thecatapi.com/v1';
 
 /* post a cat gif */
 function Cat(bot) {
@@ -68,7 +68,9 @@ function Cat(bot) {
                 resolve(categories);
               });  
             });
-          });
+          }).on('error', function (err) { console.error('cat',err); 
+                                         reject(err);
+                                        } );
         });
         
       }
@@ -118,7 +120,7 @@ function Cat(bot) {
           console.error(`Got error: ${e.message}`);
           cb('cat in error');
         });  
-      });
+      }).catch(function(e) { console.error(e); cb('the cat died');});
       
     }
     init(cat.length > 1?cat.trim():null);

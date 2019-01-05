@@ -41,7 +41,7 @@ function Status(bot) {
           usr = seenUsers[u];
           if (usr.name && usr.cnt >= 0) {
             if (usr.blocked !== true) {
-               var statsName = usr.name + (showUserId? ' ( ' + usr.userid + ' ) ':'');
+               var statsName = usr.name + (showUserId? ' (' + usr.userid + ')':'');
                statList.push( { name: statsName, cnt: usr.cnt, last_seen: usr.last_seen, totalcnt: usr.totalcnt });
             } else {
               console.log('blocked user: ', usr);
