@@ -209,7 +209,7 @@ describe('Poster', () => {
 });
 
 describe('Stack Exchange login', () => {
-  var wss 
+  var wss; 
   before(()=> {
     wss = new WebSocket.Server({ port:0 });
     //console.error('sel wss options', wss);
@@ -241,7 +241,10 @@ describe('Stack Exchange login', () => {
           if (url.indexOf('/ws-auth') > 0) {
             dataToEmit = '{"url":"ws://localhost:' + wss.address().port + '/"}';
           }
-          console.log('pf', url,data);
+          if (url.indexOf('/leave') > 0) {
+            dataToEmit = '{"events":[]}';
+          }
+          console.log('postform', url,data);
           return new Promise((res,rej)=> {
             var ms = new require('stream').Readable();
             ms._read = function(size) { /* do nothing */ };
