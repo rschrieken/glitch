@@ -199,7 +199,7 @@ describe('Poster', () => {
       msgposter.ownMessageReceived();
       setTimeout(() => {msgposter.ownMessageReceived();}, 100);
       setTimeout(() => {msgposter.ownMessageReceived();}, 200);
-      setTimeout(() => {msgposter.ownMessageReceived();}, 300);
+      //setTimeout(() => {msgposter.ownMessageReceived();}, 300);
       assert.doesNotThrow(() => {msgposter.send('fubar')});
       
       timer = setTimeout( () => {done('throttled!')},9000);
@@ -250,7 +250,8 @@ describe('Stack Exchange login', () => {
               ms.emit('end');
             },1);
             res(ms);});
-        }
+        },
+        postLeave: () =>{}
       }
     }};
   

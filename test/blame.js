@@ -9,7 +9,8 @@ describe('Bot commands', function() {
       var bot = {
         seenUsers: function() { return {42: {name: 'foo'}} },
         send: function(m) { 
-          done('should not send a message') }
+          done('should not send a message') },
+        getHostname: () => {return'https://test'}
       }
       var command = new require('../bots/commands/blame.js')(bot);
       command.next({});
@@ -23,7 +24,8 @@ describe('Bot commands', function() {
         seenUsers: function() { return {42: {name: 'foo', cnt:1, is_moderator:false}}},
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
-          done() }
+          done() },
+        getHostname: () => {return'https://test'}
       }
       var command = new require('../bots/commands/blame.js')(bot);
       command.next({message_id:42});
@@ -38,7 +40,8 @@ describe('Bot commands', function() {
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
           assert.ok(m.indexOf('for fubar') > 0); 
-          done() }
+          done() },
+        getHostname: () => {return'https://test'}
       }
       var command = new require('../bots/commands/blame.js')(bot);
       command.next({message_id:42}, 'fubar');
@@ -53,7 +56,8 @@ describe('Bot commands', function() {
         send: function(m) { 
           assert.ok(m.indexOf('@foo') > 0); 
           assert.ok(m.indexOf('for @fubar') > 0); 
-          done() }
+          done() },
+        getHostname: () => {return'https://test'}
       }
       var command = new require('../bots/commands/blame.js')(bot);
       command.next({message_id:42}, '@fubar');
@@ -67,7 +71,8 @@ describe('Bot commands', function() {
         seenUsers: function() { return {42: {name: 'fu bar', cnt:1, is_moderator:false}} },
         send: function(m) { 
           assert.ok(m.indexOf('@fubar') > 0); 
-          done() }
+          done() },
+        getHostname: () => {return'https://test'}
       }
       var command = new require('../bots/commands/blame.js')(bot);
       command.next({message_id:42, name:'fu bar'});
