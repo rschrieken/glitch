@@ -106,7 +106,7 @@ function getServerUrl(server) {
   var serverbase = '';
   switch(server) {
     case '1':
-      serverbase = process.env.SERVERBASE1;
+      serverbase = process.env.SERVERBASE1 || '';
       break;
     case '2':
       serverbase = process.env.SERVERBASE2;
