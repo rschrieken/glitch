@@ -98,12 +98,12 @@ function  isInitialized() {
 }
 
 function stop () {
-  roomInstance.postLeave();
+  if (roomInstance) roomInstance.postLeave();
   roomInstance = null;
 }
 
 function getServerUrl(server) {
-  var serverbase;
+  var serverbase = '';
   switch(server) {
     case '1':
       serverbase = process.env.SERVERBASE1;
