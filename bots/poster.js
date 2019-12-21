@@ -29,6 +29,9 @@ function MessagePoster(room, prepend) {
     }
   }
 
+  function uploadImage(url) {
+    return room.postImage(url);
+  }
   function realsend(txt) {
     if (silent) {
         console.log(txt);
@@ -146,6 +149,7 @@ function MessagePoster(room, prepend) {
   
   return {
     send: send,
+    uploadImage: uploadImage,
     ownMessageReceived: ownMessageReceived,
     stop: stop,
     silent: function (val) { if (val !== undefined) {silent = val;} return silent;}

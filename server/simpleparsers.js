@@ -23,6 +23,74 @@ function ResponseParser(type, response) {
     return new Promise(executor);
   }
   
+  // looks for the image url
+  function HtmlScriptParser(res) {
+    var url, script = '', state = 0;
+    
+    function executor(resolve, reject) {
+      var parser = new htmlparser.Parser(
+         {
+           onopentag: function(tagname, attr) {
+             if (state === 0 && tagname === 'html' )  {        
+               state++;
+             }
+             if (state === 1 && tagname === 'head' )  {        
+               state++;
+             }
+             if (state === 2 && tagname === 'script') {
+               state++;
+             }             
+           },
+           ontext: function(text) {
+             if (state === 3) {
+               console.log(text);
+               script += text;
+             }
+           },
+           onclosetag: function(tagname) {
+             if (['html','head','script'].indexOf(tagname) > -1) {
+               state--;
+             }
+           }
+         },{ decodeEntities: true }
+      );
+      res.on('data', (d) => {
+         parser.write(d);
+      });
+      res.on('error', (error) => {
+        console.log(error);
+        reject(error);
+      });
+      res.on('end', (d) => {
+        console.log("hsp", res.headers, res.trailers);
+        parser.end();
+        console.log('hsp script', script);
+        const regex = /^\s+var\s+result\s+=\s+'(.*)';$/gm;
+        let m;
+
+        while ((m = regex.exec(script)) !== null) {
+            // This is necessary to avoid infinite loops with zero-width matches
+            if (m.index === regex.lastIndex) {
+                regex.lastIndex++;
+            }
+
+            // The result can be accessed through the `m`-variable.
+            m.forEach((match, groupIndex) => {
+                console.log(`Found match, group ${groupIndex}: ${match}`);
+              if (groupIndex === 1) url = match;
+            });
+        }
+        if (url) {
+          //console.log(auth_form);
+          resolve(url);
+        } else {
+          reject(false);
+        }
+      });
+    };
+    return new Promise(executor);
+  }
+  
   function FormParser(res) {
     var metaform = {}, state = 0;
     
@@ -285,6 +353,9 @@ function ResponseParser(type, response) {
       break;
     case 'debug':
       parserImpl = new DebugParser(response);
+      break;
+    case 'image':
+      parserImpl = new HtmlScriptParser(response);
       break;
     default:
       parserImpl = new DebugParser(response);

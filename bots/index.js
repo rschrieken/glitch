@@ -253,6 +253,7 @@ function init(roomInstance) {
   initBotCommands({
     send: messagePoster.send,
     silence: messagePoster.silent,
+    uploadImage: messagePoster.uploadImage,
     started: started,
     seenUsers: function () {return roomInstance.seenUsers },
     allSeenUsers: allSeenUsers,

@@ -34,7 +34,8 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
     'info': serverbase + '/user/info',
     'auth': serverbase + '/ws-auth',
     'events': serverbase + '/chats/' + roomId + '/events',
-    'leave': serverbase + '/chats/leave/' + roomId
+    'leave': serverbase + '/chats/leave/' + roomId,
+    'image': serverbase + '/upload/image'
   }
   
   var browser = authenticatedBrowser;
@@ -193,7 +194,32 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
       return new Promise(executor);
     }
 
-    
+    ChatRoom.prototype.postImage = function (url) {
+      
+      this.emit('action', 'image');
+      
+      function executor(resolve,reject) {
+        
+        browser.postform(urls.image,
+          {
+            'upload-url': url
+          }).
+          then((res) => {
+            var imageParser = new ResponseParser('image', res); 
+            imageParser.then((url)=>{
+              console.log('pi resolve', url);
+              resolve(url);
+            }).catch((e)=>{
+              console.log('pi catch', e);
+              resolve(null);
+            });
+            
+        });
+      }
+      return new Promise(executor);
+    }  
+  
+  
     ChatRoom.prototype.postLeave = function () {
       // http://chat.meta.stackexchange.com/chats/leave/1034
       //var url = serverbase + '/chats/leave/' + roomId;
