@@ -8,13 +8,44 @@ const baseUrl = 'https://cataas.com/cat';
 function Cat(bot) {
   var listener, categories, categoriePromise;
   
-  function fetchCataas(text, cb) {
-    var url = baseUrl;
-    if (text && text.length > 0) {
-      url += '/' + text;
+  function buildPath(tag, say) {
+    var parts =[];
+    if (tag.length > 0) {
+      parts.push(tag);
     }
+    if (say.length > 0) {
+      parts.push('says');
+      parts.push(say);
+    }
+    return '/' + parts.join('/');
+  }
+  
+  function dummy () {}
+  
+  function fetchCataas(text, cb) {
+    var url = baseUrl, tag, say, clean, quoteEnd, quoteStart;
+    if (text && text.length > 0) {
+      clean =  text.trim();
+      //parsing etc
+      quoteStart = clean.indexOf('"');
+      if (quoteStart > -1) {
+        quoteEnd = clean.indexOf('"', quoteStart +1);
+        if (quoteEnd > 0) {
+          say = clean.substring(quoteStart + 1, quoteEnd);
+        }
+        tag = clean.substring(0, quoteStart-1);
+      } else {
+        tag = clean;
+      }
+      url += buildPath(tag,say);
+    }
+    console.log('cataas: ', url)
     bot.uploadImage(url).then((imgurl)=>{
-      cb(imgurl);      
+      if (imgurl !== null) {
+        cb(imgurl);      
+      } else {
+        cb('no  cats available');
+      }
     }).catch(()=>{
       cb('a dog chased the cat away');
     });
