@@ -45,6 +45,8 @@ function Cat(bot) {
         quoteEnd = clean.indexOf('"', quoteStart +1);
         if (quoteEnd > 0) {
           say = clean.substring(quoteStart + 1, quoteEnd);
+        } else {
+          say = clean.substring(quoteStart + 1, clean.length);
         }
         tag = firstWord(clean.substring(0, quoteStart-1));
       } else {
@@ -65,13 +67,14 @@ function Cat(bot) {
   }
   
   
+  var waitResponses = ['looking for cats ...', 'now where did I put those pictures ...','wait for it ...','meow meow meow ...'];
   
   function stateHandler(ce, text) {
     var silent = false;
     // handle category
     // http://thecatapi.com/api/categories/list
     if (!silent) {
-      bot.send('looking for cats ...');
+      bot.send(waitResponses[Math.floor(Math.random()*waitResponses.length)]);
       fetchCataas(text, function(data){
          if (data ) {
            bot.send(':' + ce.message_id + ' ' + data);
@@ -87,7 +90,7 @@ function Cat(bot) {
   return {
     events: [1,2],
     command : '!!cat',
-    usage: '!!cat [category] ["text"]',
+    usage: '[category] ["text"]',
     next: stateHandler
   };
 }
