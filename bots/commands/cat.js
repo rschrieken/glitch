@@ -8,19 +8,32 @@ const baseUrl = 'https://cataas.com/cat';
 function Cat(bot) {
   var listener, categories, categoriePromise;
   
-  function buildPath(tag, say) {
+  function hasValue(str) {
+      return (str && typeof str === 'string' && str.length > 0)
+    }
+  
+  function buildPath(tag, say) { 
+    
     var parts =[];
-    if (tag.length > 0) {
+    if (hasValue(tag)) {
       parts.push(tag);
     }
-    if (say.length > 0) {
+    if (hasValue(say)) {
       parts.push('says');
       parts.push(say);
     }
     return '/' + parts.join('/');
   }
   
-  function dummy () {}
+  function firstWord (str) {
+    var word;
+    if (hasValue(str)) {
+      word = str.split(' ')[0];
+    } else {
+      word = '';
+    }
+    return word;
+  }
   
   function fetchCataas(text, cb) {
     var url = baseUrl, tag, say, clean, quoteEnd, quoteStart;
@@ -33,9 +46,9 @@ function Cat(bot) {
         if (quoteEnd > 0) {
           say = clean.substring(quoteStart + 1, quoteEnd);
         }
-        tag = clean.substring(0, quoteStart-1);
+        tag = firstWord(clean.substring(0, quoteStart-1));
       } else {
-        tag = clean;
+        tag = firstWord(clean);
       }
       url += buildPath(tag,say);
     }
@@ -44,7 +57,7 @@ function Cat(bot) {
       if (imgurl !== null) {
         cb(imgurl);      
       } else {
-        cb('no  cats available');
+        cb('no cats available');
       }
     }).catch(()=>{
       cb('a dog chased the cat away');
@@ -58,6 +71,7 @@ function Cat(bot) {
     // handle category
     // http://thecatapi.com/api/categories/list
     if (!silent) {
+      bot.send('looking for cats ...');
       fetchCataas(text, function(data){
          if (data ) {
            bot.send(':' + ce.message_id + ' ' + data);
@@ -73,6 +87,7 @@ function Cat(bot) {
   return {
     events: [1,2],
     command : '!!cat',
+    usage: '!!cat [category] ["text"]',
     next: stateHandler
   };
 }

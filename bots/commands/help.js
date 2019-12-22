@@ -41,6 +41,7 @@ function Help(bot) {
 					    if (state.command) {
 							msg = msg + 
                 state.command  + 
+                (state.usage?' ' + state.usage:'')+
                 (typeof state.ttw === "function" && state.ttw() !== undefined ? 
                  ' ( wait ' + FormatSeconds((state.ttw().getTime() - new Date().getTime())/1000) + ' )' :'' ) + 
                 '\r\n';

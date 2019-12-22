@@ -218,7 +218,7 @@ function statesAccessor() {
   var copy = [];
   commandInstances.forEach(function(state){
     if (state.command) {
-      copy.push( { command: state.command, ttw: state.ttw });
+      copy.push( { command: state.command, ttw: state.ttw, usage: state.usage });
     }
   });
   return copy;
