@@ -57,16 +57,39 @@ function WordParser(res) {
 /* last message tracker */
 function Wag(bot, logger) {
   var listener,
-      url='http://www.wordassociation.org/words',
+      url='http://wordassociation.org/words',
       log = logger || console;
-  
+ 
   function fetchWag(word, cb) {
-    http.get(url + '/' + word , (res) => {
-      res.setEncoding('utf8');
-      new WordParser(res).then((words)=>{ cb(words);  }).catch(()=>{logger.error('wag parse err')});
-    }).on('error', (e) => {
-      log.error(`Got error: ${e.message}`);
-    });
+    var redirectCount = 0;
+    
+    function fetchReal(url) {
+      http.get(url , (res) => {
+        if (res.statusCode < 300) {
+          res.setEncoding('utf8');
+          new WordParser(res).then((words)=>{ cb(words);  }).catch(()=>{logger.error('wag parse err')});
+        } else if (res.statusCode >300 && res.statusCode < 304 ) {
+          if (redirectCount > 10 )
+          {
+            log.error(`wag too many 300: ${res.statusCode}`);  
+            cb([]);
+          } else {
+            if (res.headers && res.headers.location) {
+               fetchReal(res.headers.location); // recursive
+            }
+          }
+          redirectCount++;
+        } else if (res.statusCode >399) {
+          log.error(`wag status: ${res.statusCode}`);  
+        } else {
+          log.error(`wag Huh? status: ${res.statusCode}`);  
+        }
+      }).on('error', (e) => {
+        log.error(`Got error: ${e.message}`);
+      });  
+    }
+    
+    fetchReal(url + '/' + word);
   }
   
   function sendWord(word, message_id) {
