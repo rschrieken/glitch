@@ -9,7 +9,7 @@
   "scripts": {
     "prestart": "mocha --exit --reporter doc > views/test.html",
     "start": "node server.js",
-    "test": "mocha --exit --reporter doc"
+    "test": "mocha --exit"
   },
   "dependencies": {
     "express": "^4.16.3",
