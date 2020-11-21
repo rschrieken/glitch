@@ -36,8 +36,8 @@ function LastMessage(bot) {
       previousTitle,
       urlCurrent = 0,
       fallbackCurrent = 0,
-      minutesToNext = 1,
-      minutesLow = 1,
+      minutesToNext = 60,
+      minutesLow = 60,
       skip = false;
 
   
