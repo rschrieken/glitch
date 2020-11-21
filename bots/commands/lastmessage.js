@@ -2,6 +2,17 @@ const util = require('../util.js');
 const http = require('http');
 const apikey = process.env.OMDBAPIKEY;
 
+const yt = ['https://www.youtube.com/watch?v=e2vBLd5Egnk','https://www.youtube.com/watch?v=CBdQYwpj7VU','https://www.youtube.com/watch?v=O7vHqm9HcXc','https://www.youtube.com/watch?v=1Cw1ng75KP0'];
+
+var ytIndex = 0;
+
+function getYouTube() {
+  var msg = '[I\'m a little bit lonely...](' + yt[ytIndex] + ')';
+  ytIndex++;
+  ytIndex = (ytIndex % yt.length);
+  return msg;
+}
+
 /* last message tracker */
 function LastMessage(bot) {
   var listener,
@@ -16,7 +27,7 @@ function LastMessage(bot) {
       fallback =[
         'Where is everybody!?!',
         'Can\'t we be a bit moar talkative?',
-        '[I\'m a little bit lonely...](https://www.youtube.com/watch?v=dUq16D_bqpo)',
+        getYouTube,
         'Echo ... E c h o  ...... E   c  h   o .....',
         'What is this? Weekend?',
         'Who needs sleep here?',
@@ -25,10 +36,12 @@ function LastMessage(bot) {
       previousTitle,
       urlCurrent = 0,
       fallbackCurrent = 0,
-      minutesToNext = 60,
-      minutesLow = 60,
+      minutesToNext = 1,
+      minutesLow = 1,
       skip = false;
 
+  
+  
   function resetTimer(noreset) {
     clearTimeout(listener);
     listener = setTimeout(sendRandomWord, util.minutes(minutesToNext));  
@@ -111,7 +124,11 @@ function LastMessage(bot) {
          restart();
        } else {
          if (final) {
-           bot.send(fallback[fallbackCurrent]);
+           var anyfallback = fallback[fallbackCurrent];
+           if (typeof anyfallback === 'function') {
+             anyfallback = anyfallback();
+           }
+           bot.send(anyfallback);
            fallbackCurrent++;
            fallbackCurrent = (fallbackCurrent % fallback.length);
            restart();

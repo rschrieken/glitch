@@ -61,7 +61,7 @@ function Flush(bot) {
            console.log('hammered by ', ce.user_name );
           break;
         case 0:
-          var all = channel.then((feeds) => {
+           channel.then((feeds) => {
             if(feeds && feeds.length > 0) {
               bot.send(':' + ce.message_id + ' https://www.youtube.com/watch?v=' + feeds[util.getRandomMax(feeds.length)] ); // onebox   
             } else {
