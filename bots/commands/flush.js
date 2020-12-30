@@ -7,6 +7,8 @@ const parseString = require('xml2js').parseString;
 // (kindly constructed and provided by  Queenie Goldstein because I do not know how YT works)
 const url = 'https://www.youtube.com/feeds/videos.xml?channel_id=UCtqKcoTNt1pK8qMBP_RTOXw'; // 'https://stackoverflow.com/feeds/user/578411';// ;
 
+var intervalId;
+
 // bot is in the instance which gives access to the actual chat bot
 function Flush(bot) {
     var i = 0, // keeps state
@@ -39,7 +41,11 @@ function Flush(bot) {
                     }
                   }
                 }
-                setInterval(function() { channel = getFeed(url); }, (entries.length + 1) * 60 * 60 * 1000); // once every length of entries hours
+                clearInterval(intervalId);
+                intervalId = setInterval(function() { 
+                  channel = getFeed(url); 
+                }, 
+                (entries.length + 1) * 60 * 60 * 1000); // once every length of entries hours
                 resolve(entries);
               }
             })

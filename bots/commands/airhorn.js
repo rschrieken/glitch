@@ -6,6 +6,8 @@ const parseString = require('xml2js').parseString;
 // use rss feed  
 const url = 'https://www.youtube.com/feeds/videos.xml?playlist_id=UU8TlJDFKxci1RrcRD1eCd7g';
 
+var intervalid;
+
 // bot is in the instance which gives access to the actual chat bot
 function Airhorn(bot) {
     var i = 0, // keeps state
@@ -38,7 +40,8 @@ function Airhorn(bot) {
                     }
                   }
                 }
-                setInterval(function() { channel = getFeed(url); }, (entries.length + 1) * 60 * 60 * 1000); // once every length of entries hours
+                clearInterval(intervalid);
+                intervalid = setInterval(function() { channel = getFeed(url); }, (entries.length + 1) * 60 * 60 * 1000); // once every length of entries hours
                 resolve(entries);
               }
             })
