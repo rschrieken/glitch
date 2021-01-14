@@ -1,6 +1,5 @@
-const Entities = require('html-entities').AllHtmlEntities;
+const entities = require('html-entities');
  
-const entities = new Entities();
 
 /*detect a Train... */
 function TrainState(bot) {

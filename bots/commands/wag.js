@@ -2,7 +2,13 @@ const util = require('../util.js');
 const http = require('http');
 const htmlparser = require('htmlparser2');
 
-const blacklist = JSON.parse(Buffer.from('WyJuaWdnZXIiLCJmdWNrIl0=', 'base64').toString());
+const db = require('better-sqlite3')('.data/wag.db');
+
+db.exec('CREATE TABLE IF NOT EXISTS blocklist(id integer primary key, word TEXT)');
+
+const stmt = db.prepare('SELECT id FROM blocklist where word = ?');
+
+//const blacklist = JSON.parse(Buffer.from('WyJuaWdnZXIiLCJmdWNrIl0=', 'base64').toString());
 
 function WordParser(res) {
   var state = 0, words =[];
@@ -27,7 +33,15 @@ function WordParser(res) {
          ontext: function(text) {
            if (state === 2) {
              if (words.indexOf(text) === -1 ) {
-               words.push(text);
+               if (text && typeof text === 'string') {
+                 text = text.toLowerCase();
+                 var val = stmt.get(text);
+                 if (val === undefined) {
+                   words.push(text);    
+                 } else {
+                   console.log('blocked word ', val, text)
+                 }
+               }
              }
            }
          },
@@ -106,7 +120,7 @@ function Wag(bot, logger) {
          var ok = [];
          for(var i=0; i<data.length; i++) {
            var idx = lastwords.indexOf(data[i]);
-           if (idx === -1 && blacklist.indexOf(data[i].toLowerCase()) === -1) {
+           if (idx === -1) {  // && blacklist.indexOf(data[i].toLowerCase()) === -1) {
              ok.push(data[i]);
            }
          }

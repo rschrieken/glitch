@@ -4,7 +4,7 @@ const glob = require( 'glob' ),
       EventEmitter = require('events'),
       poster = require('./poster.js');
 
-const Entities = require('html-entities').AllHtmlEntities;
+const entities = require('html-entities');
 
 const db = new Datastore({ filename: './.data/seenusers.db', autoload: true });
 
@@ -54,7 +54,6 @@ db.update({ cnt: {$gt:0} },
               console.log('reset state of %d', nr);
           });
 
-const entities = new Entities();
 
 class CommandEmitter extends EventEmitter {}
 
