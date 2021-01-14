@@ -106,7 +106,7 @@ function Wag(bot, logger) {
          var ok = [];
          for(var i=0; i<data.length; i++) {
            var idx = lastwords.indexOf(data[i]);
-           if (idx === -1 && blacklist.indexof(data[i].toLowerCase()) === -1) {
+           if (idx === -1 && blacklist.indexOf(data[i].toLowerCase()) === -1) {
              ok.push(data[i]);
            }
          }
