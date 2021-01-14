@@ -46,7 +46,18 @@ function MessagePoster(room, prepend) {
               }
               init();
           }
-        }).catch((e)=>{ console.warn('realsend error', e); ownMessageReceived(); init();});
+        }).catch((e)=>{ 
+          
+          console.warn('realsend error', e.statusCode, e.statusMessage);
+          if (e.statusCode === 409) {
+            throttle = util.seconds(120);
+            init();
+            startThrottleFallback();
+          } else {
+            ownMessageReceived(); 
+            init();
+          }
+        });
       } catch(e) {
         console.log(e);
       }
