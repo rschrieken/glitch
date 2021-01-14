@@ -170,7 +170,7 @@ function handleSeenUser(userid) {
   }
   
   function updateUser(docs) {
-      console.log('hsu update ',docs);
+      //console.log('hsu update ',docs);
       updateOneUser({
         _id: docs[0]._id
       }, docs[0].blocked);

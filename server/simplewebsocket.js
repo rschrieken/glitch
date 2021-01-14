@@ -96,7 +96,7 @@ function SocketHandler(roomInstance) {
     if (room) {
       roomInstance.status.lastPing = Date.now();
       roomInstance.status.cntPing++;
-      if (!isEmpty(room)) console.log('message: ', m.data);
+      // if (!isEmpty(room)) console.log('message: ', m.data);
       if (room.e) {
         var ids = getUniqueUserids(room.e);
         roomInstance.postInfo(ids.userIds, ids.forceIds);       

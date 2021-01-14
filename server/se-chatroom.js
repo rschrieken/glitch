@@ -98,7 +98,7 @@ function Room(activeRoomId, chatServerBaseUrl, authenticatedBrowser, activeFkey,
           currentUser.last_seen = user.last_seen;
         }
       });
-      console.log('postInfo clean', clean);
+      //console.log('postInfo clean', clean);
       return clean;
     }
     

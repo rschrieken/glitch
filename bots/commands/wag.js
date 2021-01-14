@@ -2,6 +2,8 @@ const util = require('../util.js');
 const http = require('http');
 const htmlparser = require('htmlparser2');
 
+const blacklist = JSON.parse(atob('WyJuaWdnZXIiLCJmdWNrIl0='));
+
 function WordParser(res) {
   var state = 0, words =[];
 
@@ -104,7 +106,7 @@ function Wag(bot, logger) {
          var ok = [];
          for(var i=0; i<data.length; i++) {
            var idx = lastwords.indexOf(data[i]);
-           if (idx === -1) {
+           if (idx === -1 && blacklist.indexof(data[i].toLowerCase()) === -1) {
              ok.push(data[i]);
            }
          }
