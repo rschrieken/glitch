@@ -2,7 +2,7 @@ const util = require('../util.js');
 const http = require('http');
 const htmlparser = require('htmlparser2');
 
-const blacklist = JSON.parse(atob('WyJuaWdnZXIiLCJmdWNrIl0='));
+const blacklist = JSON.parse(Buffer.from('WyJuaWdnZXIiLCJmdWNrIl0=', 'base64').toString());
 
 function WordParser(res) {
   var state = 0, words =[];
