@@ -50,9 +50,9 @@ function MessagePoster(room, prepend) {
           
           console.warn('realsend error', e.statusCode, e.statusMessage);
           if (e.statusCode === 409) {
-            throttle = util.seconds(120);
+            throttle = util.seconds(60);
+            ownMessageReceived(); 
             init();
-            startThrottleFallback();
           } else {
             ownMessageReceived(); 
             init();
