@@ -32,6 +32,7 @@ function MessagePoster(room, prepend) {
   function uploadImage(url) {
     return room.postImage(url);
   }
+  
   function realsend(txt) {
     if (silent) {
         console.log(txt);
@@ -150,8 +151,14 @@ function MessagePoster(room, prepend) {
                 realsend(txt);
             }
         } else {
-            console.log('throtled:' + ownmsg[ownmsg.length - 1].toString());
+          console.log('throtled:' + ownmsg[ownmsg.length - 1].toString(), ownmsg.length);
+          if ((Date.now() - ownmsg[ownmsg.length - 1]) > (1000 * 60 * 3)) {
+            ownmsg.shift();
+            console.log('trying to unthrottle at ', new Date(), ownmsg[ownmsg.length - 1].toString(), ownmsg.length, JSON.stringify(ownmsg));
+            stopThrottleFallback();
+          } else {
             startThrottleFallback();
+          }
         }
     }, throttle);
   }
