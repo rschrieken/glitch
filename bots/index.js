@@ -77,29 +77,32 @@ function handleEvent(ce) {
        ownerCommand !== undefined) {
       commandExecuted = ownerCommand.next(ce);
   }
-  length = commandInstances.length;
-  cmd = cmdRegex.exec(entities.decode(ce.content));
-  for (i = 0; i < length && !commandExecuted; i = i + 1) {
-    state = commandInstances[i];
-    if ((state.events !== undefined && (state.events.indexOf(ce.event_type) > -1)) &&
-        (state.command === undefined || (cmd !== null && cmd.length > 0 && cmd[1] === state.command))) {
-      if (cmd !== null && cmd.length > 1) {
-        state.next(ce, cmd[2]);
-      } else {
-        state.next(ce);
-      }
-      if (state.command !== undefined) {
-        commandExecuted = true;
+  isUserBlocked(ce.user_id).then(function(blocked) {
+    if (blocked) return;
+    length = commandInstances.length;
+    cmd = cmdRegex.exec(entities.decode(ce.content));
+    for (i = 0; i < length && !commandExecuted; i = i + 1) {
+      state = commandInstances[i];
+      if ((state.events !== undefined && (state.events.indexOf(ce.event_type) > -1)) &&
+          (state.command === undefined || (cmd !== null && cmd.length > 0 && cmd[1] === state.command))) {
+        if (cmd !== null && cmd.length > 1) {
+          state.next(ce, cmd[2]);
+        } else {
+          state.next(ce);
+        }
+        if (state.command !== undefined) {
+          commandExecuted = true;
+        }
       }
     }
-  }
-  if (!commandExecuted
-      && ce.event_type === 1
-      && ce.content !== undefined) {
-    if (ce.content.indexOf('!!') === 0) {
-      unk.next();
+    if (!commandExecuted
+        && ce.event_type === 1
+        && ce.content !== undefined) {
+      if (ce.content.indexOf('!!') === 0) {
+        unk.next();
+      }
     }
-  }
+  }).catch((res)=> console.error);
 }
 
 
@@ -108,6 +111,19 @@ function allSeenUsers() {
     db.find({}, function(err, docs) {
       if (err) resolve([]); 
       else resolve(docs);
+    });
+  });
+}
+
+function isUserBlocked(userid){
+  return new Promise(function(resolve, reject) {
+    db.find({userid: userid, blocked:true}, function(err, docs) {
+      if (err) {
+        console.error(err);
+        reject(new Error(err));
+      } else {
+        resolve(docs.length !== 0);
+      }
     });
   });
 }
