@@ -16,14 +16,7 @@ function getYouTube() {
 /* last message tracker */
 function LastMessage(bot) {
   var listener,
-      url=['http://www.omdbapi.com/?apikey=' + apikey + '&t=shadow&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=wizard&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=obscurity&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=shade&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=dimness&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=magician&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=shaman&y=',
-           'http://www.omdbapi.com/?apikey=' + apikey + '&t=warlock&y='],
+      url = ['shadow', 'wizard', 'obscurity', 'shade', 'dimness', 'magician', 'shaman', 'warlock'].map((term)=> 'http://www.omdbapi.com/?apikey=' + apikey + '&t=' + term + '&y='),
       fallback =[
         'Where is everybody!?!',
         'Can\'t we be a bit moar talkative?',

@@ -78,7 +78,9 @@ function handleEvent(ce) {
       commandExecuted = ownerCommand.next(ce);
   }
   isUserBlocked(ce.user_id).then(function(blocked) {
-    if (blocked) return;
+    if (blocked === true) {
+      return;
+    }
     length = commandInstances.length;
     cmd = cmdRegex.exec(entities.decode(ce.content));
     for (i = 0; i < length && !commandExecuted; i = i + 1) {
