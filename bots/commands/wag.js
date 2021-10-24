@@ -1,5 +1,5 @@
 const util = require('../util.js');
-const http = require('http');
+const http = require('https');
 const htmlparser = require('htmlparser2');
 
 const db = require('better-sqlite3')('.data/wag.db');
@@ -73,7 +73,7 @@ function WordParser(res) {
 /* last message tracker */
 function Wag(bot, logger) {
   var listener,
-      url='http://wordassociation.org/words',
+      url='https://wordassociation.org/words',
       log = logger || console;
  
   function fetchWag(word, cb) {

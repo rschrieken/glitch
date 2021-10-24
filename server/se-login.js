@@ -32,15 +32,17 @@ function postlogin(form, chatServerUrl, roomId) {
     + roomId;
   
   function executor(resolve,reject) {
+    console.log('postlogin', url, form);
     webbrowser.postform(url,form).
     then((res) => {
       var respParser = new ResponseParser('ident',res);
       respParser.then( function(identity /*foundfkey, userid*/){
+        console.log('postlogin respParser idenr', identity);
         joinroom(roomId, chatServerUrl, webbrowser, identity).
           then(resolve,reject).
           catch((e)=> { console.log(e); reject('room joined failed'); });
-        }, reject);
-    });
+        }, reject).catch(reject);
+    }).catch(reject);
   }
   
   return new Promise(executor);
@@ -141,28 +143,39 @@ function login (user, pwd, roomId, server) {
             webbrowser.get(serverbase + '/rooms/' + roomId ).then( (chatres) => {
               var respParser = new ResponseParser('ident',chatres);
               respParser.then( function(identity /*foundfkey, userid*/){
-                console.log(identity);
+                console.log('login identity',identity);
                 joinroom(roomId, serverbase, webbrowser, identity).
                   then(resolve,reject).
-                  catch((e)=> { console.log(e); reject('room joined failed'); });
-              });
-            });
-          });
-        }, reject);
+                  catch((e)=> { console.error('loginse joinroom failed', e); reject('room joined failed'); });
+              }).catch((e)=>{console.error('loginse parser failed ',e); reject('parser failed')});
+            }).catch((e)=>{console.error('loginse webbrowser get failed ',e); reject('get failed')});
+          }).catch((e)=>{console.error('loginse webbrowser postform failed ',e); reject('post failed')});
+        }, reject).catch(reject);
       }).catch(reject);
     }
     
-    console.log(loginurl);
+    console.log('login url:', loginurl);
     webbrowser.get(loginurl).
     then((res) => {
+      if (!res.req) {
+        console.log('res is what? :',res);
+      }
+      console.log('for responseparser', res.headers, res.req ? res.req.host: 'no req - host', res.req? res.req.path: 'no req- path');
+      if (res.req) {
+        var prefhost = res.req.protocol + '//' + res.req.host;
+        console.log('prefhost ', prefhost);
+      }
       var respParser = new ResponseParser('fkey',res);
       respParser.then( function(keyorform){
+          console.log('resppaser succes', keyorform)
           if (keyorform.auth !== undefined) {
+            console.log('pre loginse');
             loginse(
-              serverbase.replace('chat.','') + keyorform.auth.post, 
+              prefhost /* serverbase.replace('chat.','')*/ + keyorform.auth.post, 
               keyorform.auth.form
             );
           } else {
+            console.log('pre postlogin ',serverbase, keyorform.fkey);
             postlogin(
               { 
                 email: user, 
@@ -173,7 +186,7 @@ function login (user, pwd, roomId, server) {
               roomId).then(resolve).catch(reject);
           }
         }, reject);
-    });
+    }).catch((e)=> {console.error(e); reject('get 2 failed')});
   }
   
   return new Promise(executor);

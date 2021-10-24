@@ -100,8 +100,8 @@ function ResponseParser(type, response) {
       var parser = new htmlparser.Parser(
          {
            onopentag: function(tagname, attr) {
-             if (state === 0 && tagname === 'form' && 
-                 attr.method && attr.method === 'post' && 
+             if (state === 0 && tagname && tagname.toLowerCase() === 'form' && 
+                 attr.method && attr.method.toLowerCase() === 'post' && 
                  attr.action )  {        
                metaform.form = {};
                metaform.action = attr.action;
@@ -122,13 +122,13 @@ function ResponseParser(type, response) {
          parser.write(d);
       });
       res.on('error', (error) => {
-        console.log(error);
+        console.error(error);
         reject(error);
       });
       res.on('end', (d) => {
-        console.log(res.headers, res.trailers);
+        console.log('formparser end', res.headers, res.trailers);
         parser.end();
-        console.log(metaform);
+        console.log('formparser end', metaform);
         if (metaform) {
           //console.log(auth_form);
           resolve(metaform);
@@ -150,7 +150,14 @@ function ResponseParser(type, response) {
              if (tagname === 'input' && attr.name && attr.name === 'fkey') {
                fkeyParsed = attr.value;
              }
+             
              if (auth_form && tagname === 'input' && attr.name && attr.name === 'fkey') {
+               auth_form.form[attr.name] = attr.value;
+             }
+             if (auth_form && tagname === 'input' && attr.name && attr.name === 'cdl') {
+               auth_form.form[attr.name] = attr.value;
+             }
+             if (auth_form && tagname === 'input' && attr.name && attr.name === 'ssrc') {
                auth_form.form[attr.name] = attr.value;
              }
              if (auth_form && tagname === 'input' 
@@ -159,11 +166,11 @@ function ResponseParser(type, response) {
                auth_form.form[attr.name] = attr.value;
              }
              if ((auth_form === undefined) && tagname === 'form' && 
-                 attr.method && attr.method === 'post' && 
-                 attr.action && attr.action ==='/users/authenticate' )  {    
+                 attr.method && attr.method.toLowerCase() === 'post' && 
+                 attr.action && (attr.action ==='/users/authenticate' || attr.action.indexOf('/users/login?returnurl=https') === 0) )  {    
                auth_form = {}
                auth_form.form = {};
-               auth_form.post = '/users/authenticate';
+               auth_form.post = attr.action;
              }
            }
          },{ decodeEntities: true }
